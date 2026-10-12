@@ -1,0 +1,16 @@
+[
+  { "id": "SH-1", "source": "securityhub", "type": "S3.2", "resource": "acme-shared-artifacts", "account": "222222222222", "severity": "high", "title": "S3 bucket public read", "owner": "team-platform", "age_days": 12 },
+  { "id": "PR-9", "source": "prowler", "type": "s3_bucket_public_access", "resource": "acme-shared-artifacts", "account": "222222222222", "severity": "high", "title": "S3 bucket publicly accessible", "owner": "team-platform", "age_days": 12 },
+  { "id": "SH-2", "source": "securityhub", "type": "EC2.13", "resource": "sg-app-01", "account": "111111111111", "severity": "critical", "title": "Security group allows 0.0.0.0/0 on port 22", "owner": "team-payments", "age_days": 4 },
+  { "id": "PR-14", "source": "prowler", "type": "ec2_sg_open_ssh", "resource": "sg-app-01", "account": "111111111111", "severity": "critical", "title": "Security group open SSH", "owner": "team-payments", "age_days": 4 },
+  { "id": "SH-3", "source": "securityhub", "type": "IAM.5", "resource": "bob", "account": "111111111111", "severity": "high", "title": "IAM user console access without MFA", "owner": "identity", "age_days": 22 },
+  { "id": "SH-4", "source": "securityhub", "type": "RDS.3", "resource": "rds-prod-orders", "account": "111111111111", "severity": "high", "title": "RDS not encrypted at rest", "owner": "team-payments", "age_days": 40 },
+  { "id": "PR-22", "source": "prowler", "type": "rds_encryption", "resource": "rds-prod-orders", "account": "111111111111", "severity": "medium", "title": "RDS storage not encrypted", "owner": "team-payments", "age_days": 40 },
+  { "id": "SH-5", "source": "securityhub", "type": "S3.9", "resource": "acme-prod-backup", "account": "111111111111", "severity": "medium", "title": "S3 bucket missing access logging", "owner": "team-data", "age_days": 9 },
+  { "id": "PR-31", "source": "prowler", "type": "s3_access_logging", "resource": "acme-prod-backup", "account": "111111111111", "severity": "low", "title": "S3 logging disabled", "owner": "team-data", "age_days": 9 },
+  { "id": "SH-6", "source": "securityhub", "type": "EC2.8", "resource": "acme-dev-runner", "account": "333333333333", "severity": "medium", "title": "EC2 instance without IMDSv2 enforced", "owner": null, "age_days": 55 },
+  { "id": "GD-1", "source": "guardduty", "type": "Recon:IAMUser", "resource": "iam-role-deployer", "account": "111111111111", "severity": "high", "title": "Unusual API reconnaissance by role", "owner": "team-platform", "age_days": 1 },
+  { "id": "PR-40", "source": "prowler", "type": "iam_wildcard_policy", "resource": "iam-role-deployer", "account": "111111111111", "severity": "high", "title": "IAM policy with Action:*", "owner": "team-platform", "age_days": 3 },
+  { "id": "SAAS-1", "source": "saas", "type": "sharing_external", "resource": "jira-project-PAY", "account": "saas", "severity": "high", "title": "Jira project shared with external org", "owner": "team-payments", "age_days": 6 },
+  { "id": "SAAS-2", "source": "saas", "type": "admin_no_mfa", "resource": "okta-admin-fred", "account": "saas", "severity": "critical", "title": "Okta admin without MFA", "owner": "identity", "age_days": 2 }
+]

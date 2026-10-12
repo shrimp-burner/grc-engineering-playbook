@@ -1,0 +1,11 @@
+[
+  { "time": "2024-01-10T09:12:00Z", "identity": "dana@acme.com", "event": "CreateBucket", "resource": "acme-prod-data" },
+  { "time": "2024-02-01T11:30:00Z", "identity": "dana@acme.com", "event": "CreateBucket", "resource": "acme-prod-backup" },
+  { "time": "2024-03-15T14:02:00Z", "identity": "fred@acme.com", "event": "CreateBucket", "resource": "acme-shared-artifacts" },
+  { "time": "2026-09-20T08:44:00Z", "identity": "intern@acme.com", "event": "CreateBucket", "resource": "acme-dev-scratch" },
+  { "time": "2023-11-02T10:00:00Z", "identity": "pat@acme.com", "event": "CreateSecurityGroup", "resource": "sg-app-01" },
+  { "time": "2024-01-05T12:20:00Z", "identity": "pat@acme.com", "event": "CreateVolume", "resource": "ebs-vol-app-01" },
+  { "time": "2026-08-11T16:10:00Z", "identity": "intern@acme.com", "event": "RunInstances", "resource": "acme-dev-runner" },
+  { "time": "2024-06-02T09:00:00Z", "identity": "fred@acme.com", "event": "CreateFunction", "resource": "lambda-reports" },
+  { "time": "2024-07-19T13:45:00Z", "identity": "unknown@external", "event": "CreateQueue", "resource": "sqs-events" }
+]

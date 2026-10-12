@@ -1,0 +1,21 @@
+# byte-compiled / cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+env/
+
+# generated demo output
+*.db
+reports/
+demo/
+events.jsonl
+seen_events.json
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

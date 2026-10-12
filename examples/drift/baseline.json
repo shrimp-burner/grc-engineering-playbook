@@ -1,0 +1,7 @@
+{
+  "_comment": "The APPROVED configuration. Anything different in current.json is drift.",
+  "sg-app-01": { "type": "security_group", "ingress": ["10.0.0.0/8:443"], "egress": ["0.0.0.0/0:443"], "tags": { "environment": "prod", "owner": "team-payments" } },
+  "bucket-prod-data": { "type": "s3_bucket", "encryption": "aws:kms", "public": false, "versioning": true, "logging": "acme-prod-access-logs", "tags": { "environment": "prod", "owner": "team-data" } },
+  "iam-role-deployer": { "type": "iam_role", "policy_actions": ["s3:GetObject", "s3:PutObject"], "mfa_required": true, "tags": { "owner": "team-platform" } },
+  "sg-old": { "type": "security_group", "ingress": ["10.0.0.0/8:443"], "tags": { "environment": "prod" } }
+}

@@ -1,0 +1,5 @@
+[
+  { "name": "sg-app-01", "open_to_world": ["22"] },
+  { "name": "sg-db", "open_to_world": [] },
+  { "name": "sg-web", "open_to_world": [] }
+]

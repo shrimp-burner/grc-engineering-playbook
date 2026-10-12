@@ -1,0 +1,5 @@
+{
+  "_service": "AWS Security Hub",
+  "enabled": true,
+  "standards_enabled": 3
+}

@@ -1,0 +1,265 @@
+{
+  "tool": "Okta",
+  "auth": "OAuth 2.0 for Okta API: service app using client_credentials with private_key_jwt against https://<org>.okta.com/oauth2/v1/token, granted granular read scopes (okta.users.read, okta.logs.read, okta.apps.read, okta.groups.read, okta.factors.read, okta.policies.read, okta.authorizationServers.read, okta.eventHooks.read, okta.networkZones.read, okta.roles.read). Legacy API token via 'Authorization: SSWS <token>' also works but is not least-privilege.",
+  "base_url": "https://<org>.okta.com/api/v1",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/users",
+      "purpose": "Full identity inventory: lifecycle status (STAGED/PROVISIONED/ACTIVE/SUSPENDED/DEPROVISIONED), profile, credential provider, and lastLogin per user."
+    },
+    {
+      "method": "GET",
+      "path": "/users/{userId}/factors",
+      "purpose": "Enrolled authenticators per user: factorType, provider, enrollment status - the MFA-coverage and credential-binding record."
+    },
+    {
+      "method": "GET",
+      "path": "/users/{userId}/roles",
+      "purpose": "Admin role assignments for a user (SUPER_ADMIN, ORG_ADMIN, custom roles) with assignment status and timestamps."
+    },
+    {
+      "method": "GET",
+      "path": "/users/{userId}/groups",
+      "purpose": "Group memberships per user, supporting periodic entitlement review."
+    },
+    {
+      "method": "GET",
+      "path": "/groups",
+      "purpose": "Group inventory - the entitlement containers that drive application access."
+    },
+    {
+      "method": "GET",
+      "path": "/groups/rules",
+      "purpose": "Group rules that automate entitlement assignment from attribute expressions (e.g., department)."
+    },
+    {
+      "method": "GET",
+      "path": "/apps",
+      "purpose": "Application instances (SSO-integrated SaaS and supplier-provided services): label, status, signOnMode, created."
+    },
+    {
+      "method": "GET",
+      "path": "/apps/{appId}/groups",
+      "purpose": "Group assignments per app with priority, showing assignment scope used to rank app criticality."
+    },
+    {
+      "method": "GET",
+      "path": "/policies?type=PASSWORD",
+      "purpose": "Password policies: complexity, history, age, lockout - the credential-strength standard."
+    },
+    {
+      "method": "GET",
+      "path": "/policies?type=MFA_ENROLL",
+      "purpose": "MFA enrollment policies: which authenticators are required, for which groups."
+    },
+    {
+      "method": "GET",
+      "path": "/policies?type=OKTA_SIGN_ON",
+      "purpose": "Global session policies: session lifetime, idle timeout, and factor requirements."
+    },
+    {
+      "method": "GET",
+      "path": "/authorizationServers",
+      "purpose": "Custom authorization servers issuing OAuth/OIDC tokens for APIs."
+    },
+    {
+      "method": "GET",
+      "path": "/authorizationServers/{authServerId}/credentials/keys",
+      "purpose": "Token signing keys (JWKS) with status ACTIVE/NEXT/EXPIRED and rotation expiry - assertion integrity evidence."
+    },
+    {
+      "method": "GET",
+      "path": "/logs",
+      "purpose": "System Log query (since/until/filter/q, cursor pagination): authentication, session, lifecycle, admin, policy-evaluation, and threat events."
+    },
+    {
+      "method": "GET",
+      "path": "/eventHooks",
+      "purpose": "Event hooks streaming System Log events to SIEM/SOAR endpoints, with ACTIVE status and subscribed event types."
+    },
+    {
+      "method": "GET",
+      "path": "/zones",
+      "purpose": "Network zones (IP/Dynamic) consumed by sign-on policies to gate access by source network."
+    }
+  ],
+  "controls": [
+    {
+      "ref": "PR.AA-01",
+      "api": "GET /api/v1/users",
+      "fields": ["id", "status", "profile.login", "credentials.provider.type", "lastLogin"],
+      "sample": {
+        "id": "00u1a2b3c4d5e6f7g8h9",
+        "status": "ACTIVE",
+        "profile": { "login": "jane.doe@acme.com", "email": "jane.doe@acme.com" },
+        "credentials": { "provider": { "type": "OKTA" } },
+        "lastLogin": "2026-10-05T14:22:11.000Z"
+      }
+    },
+    {
+      "ref": "PR.AA-02",
+      "api": "GET /api/v1/users/{userId}/factors",
+      "fields": ["factorType", "provider", "status", "profile.credentialId", "created"],
+      "sample": {
+        "factorType": "push",
+        "provider": "OKTA",
+        "status": "ACTIVE",
+        "profile": { "credentialId": "opf1abc2def3ghi4jkl5" },
+        "created": "2026-03-11T09:04:00.000Z"
+      }
+    },
+    {
+      "ref": "PR.AA-03",
+      "api": "GET /api/v1/users/{userId}/factors",
+      "fields": ["factorType", "status"],
+      "sample": {
+        "factorType": "push",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "ref": "PR.AA-04",
+      "api": "GET /api/v1/authorizationServers/{authServerId}/credentials/keys",
+      "fields": ["kty", "use", "kid", "status", "expiresAt"],
+      "sample": {
+        "kty": "RSA",
+        "use": "sig",
+        "kid": "sJdV6qzKk0aL7yG7u0w9x1c2b3n4m5",
+        "status": "ACTIVE",
+        "expiresAt": "2026-12-31T23:59:59.000Z"
+      }
+    },
+    {
+      "ref": "PR.AA-05",
+      "api": "GET /api/v1/groups/rules",
+      "fields": ["name", "status", "conditions.expression.value", "actions.assignUserToGroups.groupIds"],
+      "sample": {
+        "name": "Engineering to Dev Apps",
+        "status": "ACTIVE",
+        "conditions": { "expression": { "value": "user.department==\"Engineering\"" } },
+        "actions": { "assignUserToGroups": { "groupIds": ["00g1x7y8z9a0b1c2d3e4"] } }
+      }
+    },
+    {
+      "ref": "GV.RR-02",
+      "api": "GET /api/v1/users/{userId}/roles",
+      "fields": ["id", "type", "status", "assignmentType", "created"],
+      "sample": {
+        "id": "JBCUYUC7IRCVGS7IFG53",
+        "type": "ORG_ADMIN",
+        "status": "ACTIVE",
+        "assignmentType": "USER",
+        "created": "2026-01-15T17:00:12.000Z"
+      }
+    },
+    {
+      "ref": "GV.SC-10",
+      "api": "GET /api/v1/logs?filter=eventType eq \"user.lifecycle.deactivate\"",
+      "fields": ["eventType", "published", "actor.alternateId", "target.alternateId", "outcome.result"],
+      "sample": {
+        "eventType": "user.lifecycle.deactivate",
+        "published": "2026-09-30T16:41:03.000Z",
+        "actor": { "alternateId": "offboarding@acme.com" },
+        "target": [ { "alternateId": "contractor@vendor.com" } ],
+        "outcome": { "result": "SUCCESS" }
+      }
+    },
+    {
+      "ref": "ID.AM-04",
+      "api": "GET /api/v1/apps",
+      "fields": ["id", "label", "name", "status", "signOnMode"],
+      "sample": {
+        "id": "0oa1b2c3d4e5f6g7h8i9",
+        "label": "Salesforce",
+        "name": "salesforce",
+        "status": "ACTIVE",
+        "signOnMode": "SAML_2_0"
+      }
+    },
+    {
+      "ref": "ID.AM-05",
+      "api": "GET /api/v1/apps/{appId}/groups",
+      "fields": ["id", "priority", "profile.name", "lastUpdated"],
+      "sample": {
+        "id": "00g9x8y7z6a5b4c3d2e1",
+        "priority": 1,
+        "profile": { "name": "Finance-App-Admins" },
+        "lastUpdated": "2026-08-12T10:05:44.000Z"
+      }
+    },
+    {
+      "ref": "DE.CM-03",
+      "api": "GET /api/v1/logs?filter=eventType eq \"user.session.start\"",
+      "fields": ["eventType", "published", "actor.alternateId", "client.ipAddress", "outcome.result"],
+      "sample": {
+        "eventType": "user.session.start",
+        "published": "2026-10-06T08:12:47.000Z",
+        "actor": { "alternateId": "jane.doe@acme.com" },
+        "client": { "ipAddress": "203.0.113.42" },
+        "outcome": { "result": "SUCCESS" }
+      }
+    },
+    {
+      "ref": "RS.AN-06",
+      "api": "GET /api/v1/logs?filter=eventType eq \"user.account.privilege.grant\"",
+      "fields": ["uuid", "eventType", "published", "actor.alternateId", "outcome.result"],
+      "sample": {
+        "uuid": "a1b2c3d4-5678-4000-8000-aa00bb11cc22",
+        "eventType": "user.account.privilege.grant",
+        "published": "2026-10-02T19:55:31.000Z",
+        "actor": { "alternateId": "sec.analyst@acme.com" },
+        "outcome": { "result": "SUCCESS" }
+      }
+    },
+    {
+      "ref": "RS.MI-01",
+      "api": "GET /api/v1/logs?filter=eventType sw \"user.lifecycle.\"",
+      "fields": ["eventType", "published", "actor.alternateId", "target.alternateId", "outcome.result"],
+      "sample": {
+        "eventType": "user.lifecycle.suspend",
+        "published": "2026-10-04T02:14:09.000Z",
+        "actor": { "alternateId": "ir.automation@acme.com" },
+        "target": [ { "alternateId": "compromised.user@acme.com" } ],
+        "outcome": { "result": "SUCCESS" }
+      }
+    },
+    {
+      "ref": "PR.IR-01",
+      "api": "GET /api/v1/zones",
+      "fields": ["id", "name", "type", "status", "usage", "gateways"],
+      "sample": {
+        "id": "nz1a2b3c4d5e6f7g8h9i0",
+        "name": "Corporate HQ Egress",
+        "type": "IP",
+        "status": "ACTIVE",
+        "usage": "POLICY",
+        "gateways": [ { "type": "CIDR", "value": "203.0.113.0/24" } ]
+      }
+    },
+    {
+      "ref": "ID.RA-02",
+      "api": "GET /api/v1/logs?filter=eventType eq \"security.threat.detected\"",
+      "fields": ["eventType", "severity", "published", "client.ipAddress", "outcome.result"],
+      "sample": {
+        "eventType": "security.threat.detected",
+        "severity": "WARN",
+        "published": "2026-10-05T23:40:18.000Z",
+        "client": { "ipAddress": "198.51.100.77" },
+        "outcome": { "result": "DENY" }
+      }
+    },
+    {
+      "ref": "PR.PS-04",
+      "api": "GET /api/v1/eventHooks",
+      "fields": ["id", "name", "status", "events.items", "channel.config.uri"],
+      "sample": {
+        "id": "cal1a2b3c4d5e6f7g8h9i",
+        "name": "siem-system-log-stream",
+        "status": "ACTIVE",
+        "events": { "items": ["user.session.start", "user.lifecycle.suspend"] },
+        "channel": { "config": { "uri": "https://siem.acme.com/okta/events" } }
+      }
+    }
+  ]
+}

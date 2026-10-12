@@ -1,0 +1,4 @@
+[
+  { "id": "vol-app-01", "encrypted": true },
+  { "id": "vol-app-02", "encrypted": false }
+]

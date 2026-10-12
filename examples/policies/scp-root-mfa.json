@@ -1,0 +1,8 @@
+{
+  "_note": "Strong SCP: root can do nothing without MFA. BoolIfExists is deliberate: aws:MultiFactorAuthPresent is absent for root using long-term credentials, and a plain Bool would not match and would fail open.",
+  "Version": "2012-10-17",
+  "Statement": [
+    { "Sid": "DenyRootWithoutMFA", "Effect": "Deny", "Action": "*", "Resource": "*",
+      "Condition": { "StringLike": { "aws:PrincipalArn": "arn:aws:iam::*:root" }, "BoolIfExists": { "aws:MultiFactorAuthPresent": "false" } } }
+  ]
+}

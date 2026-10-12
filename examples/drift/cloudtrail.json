@@ -1,0 +1,7 @@
+[
+  { "time": "2026-10-05T14:02:11Z", "identity": "jdoe@acme.com", "source": "console", "action": "AuthorizeSecurityGroupIngress", "resource": "sg-app-01", "detail": "added 0.0.0.0/0:22 to sg-app-01 (temporary debug, never removed)" },
+  { "time": "2026-10-05T09:41:03Z", "identity": "ci-deployer", "source": "terraform", "action": "DeleteBucketEncryption", "resource": "bucket-prod-data", "detail": "encryption removed by an out-of-band terraform apply" },
+  { "time": "2026-10-04T22:17:48Z", "identity": "admin@acme.com", "source": "CLI", "action": "PutRolePolicy", "resource": "iam-role-deployer", "detail": "policy replaced with Action:* to unblock a deploy" },
+  { "time": "2026-10-05T16:55:20Z", "identity": "intern@acme.com", "source": "console", "action": "CreateBucket", "resource": "bucket-dev-scratch", "detail": "created outside IaC" },
+  { "time": "2026-10-06T08:03:09Z", "identity": "platform-bot", "source": "terraform", "action": "CreateTags", "resource": "bucket-prod-data", "detail": "environment tag drifted prod -> staging" }
+]

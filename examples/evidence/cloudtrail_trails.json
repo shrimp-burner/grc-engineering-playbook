@@ -1,0 +1,4 @@
+[
+  { "name": "acme-org-trail", "account": "111111111111", "is_logging": true, "multi_region": true, "org_trail": true, "kms_key_id": "arn:aws:kms:us-east-1:111111111111:key/abc-123", "log_validation": true, "destination_bucket": "acme-cloudtrail-logs" },
+  { "name": "acme-dev-trail", "account": "333333333333", "is_logging": false, "multi_region": false, "org_trail": false, "kms_key_id": null, "log_validation": false, "destination_bucket": null }
+]

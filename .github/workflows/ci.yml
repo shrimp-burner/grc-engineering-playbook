@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: [ "3.9", "3.11" ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Byte-compile every module (catches syntax errors in files nothing imports)
+        run: python -m compileall -q src
+      - name: Import smoke test
+        run: >-
+          python -c "import grc_playbook.controls, grc_playbook.drift, grc_playbook.triage,
+          grc_playbook.logs, grc_playbook.ownership, grc_playbook.policy, grc_playbook.iac,
+          grc_playbook.webhook, grc_playbook.grc_api, grc_playbook.mock_grc_api, grc_playbook.scenario,
+          grc_playbook.collect_aws, grc_playbook.cli"
+      - name: Unit tests
+        run: python -m pytest -q
+      - name: Narrated scenario
+        run: python -m grc_playbook scenario
+      - name: Full demo
+        run: python -m grc_playbook demo
+      - name: Policy gate (asserts the enforcement modules reject the bad samples)
+        run: python scripts/policy_check.py
+      - name: OPA/Rego mirror agrees with policy.py
+        run: |
+          curl -sSL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          echo "bad policy (expect deny):"
+          ./opa eval --format pretty --data examples/rego/iam_deny.rego \
+            --input examples/policies/iam-admin-too-broad.json "data.grc.deny"
+          echo "good policy (expect empty deny):"
+          ./opa eval --format pretty --data examples/rego/iam_deny.rego \
+            --input examples/policies/iam-s3-scoped.json "data.grc.deny"
+          # Assert the mirror verdicts match policy.py: bad -> non-empty deny, good -> empty.
+          test "$(./opa eval --format json --data examples/rego/iam_deny.rego --input examples/policies/iam-admin-too-broad.json 'data.grc.deny' | python -c 'import json,sys; print(len(json.load(sys.stdin)["result"][0]["expressions"][0]["value"]))')" -ge 1
+          test "$(./opa eval --format json --data examples/rego/iam_deny.rego --input examples/policies/iam-s3-scoped.json 'data.grc.deny' | python -c 'import json,sys; print(len(json.load(sys.stdin)["result"][0]["expressions"][0]["value"]))')" -eq 0
+      - name: Docs are in sync with the data
+        run: python scripts/render_docs.py && git diff --exit-code -- docs

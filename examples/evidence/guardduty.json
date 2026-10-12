@@ -1,0 +1,5 @@
+[
+  { "account_id": "111111111111", "account_name": "acme-prod", "detector_enabled": true },
+  { "account_id": "222222222222", "account_name": "acme-shared", "detector_enabled": false },
+  { "account_id": "333333333333", "account_name": "acme-dev", "detector_enabled": true }
+]

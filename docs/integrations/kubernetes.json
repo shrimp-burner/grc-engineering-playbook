@@ -1,0 +1,787 @@
+{
+  "tool": "Kubernetes",
+  "auth": "kubeconfig with a read-only ServiceAccount bound to a cluster-scoped view/audit ClusterRole; token minted via TokenRequest (short-lived, audience-bound). On managed clusters authenticate through the cloud identity mapped into Kubernetes RBAC: EKS 'aws eks get-token' (aws-auth ConfigMap / access entries), AKS 'kubelogin' with Entra ID, GKE 'gke-gcloud-auth-plugin' with Google OIDC. x509 client certificates signed by the cluster CA are the fallback for self-managed (kubeadm) clusters.",
+  "base_url": "https://<CLUSTER_ID>.<region>.eks.amazonaws.com  (EKS) / https://<host>:6443 (self-managed)",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/apis/apps/v1/deployments",
+      "purpose": "Inventory declared workloads (Deployments; also statefulsets/daemonsets) with images and replicas (ID.AM-02)."
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/pods",
+      "purpose": "List running pods - the actual executed images, serviceAccount bindings, and node placement (ID.AM-02)."
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/serviceaccounts",
+      "purpose": "Inventory workload identities and automountServiceAccountToken posture (PR.AA-01)."
+    },
+    {
+      "method": "POST",
+      "path": "/apis/authentication.k8s.io/v1/tokenreviews",
+      "purpose": "Validate a bearer token against the configured authenticators (OIDC, x509, webhook) and return the resolved user/groups (PR.AA-03)."
+    },
+    {
+      "method": "GET",
+      "path": "/apis/rbac.authorization.k8s.io/v1/clusterrolebindings",
+      "purpose": "Review cluster-wide RBAC bindings for least privilege (who holds cluster-admin etc.) (PR.AA-05)."
+    },
+    {
+      "method": "GET",
+      "path": "/apis/rbac.authorization.k8s.io/v1/clusterroles",
+      "purpose": "Review aggregated ClusterRole rules for wildcard verbs/resources and separation of duties (PR.AA-05)."
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/namespaces/kube-system/pods",
+      "purpose": "Read kube-apiserver static-pod manifest flags: --encryption-provider-config, --audit-policy-file, --audit-log-path, --oidc-issuer-url (PR.DS-01, PR.PS-04, PR.AA-03)."
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/namespaces",
+      "purpose": "Read pod-security.kubernetes.io/enforce|audit|warn labels enforcing Pod Security Standards per namespace (PR.PS-05)."
+    },
+    {
+      "method": "GET",
+      "path": "/apis/admissionregistration.k8s.io/v1/validatingadmissionpolicies",
+      "purpose": "List in-tree ValidatingAdmissionPolicies (CEL) blocking unauthorized workload specs at admission (PR.PS-05)."
+    },
+    {
+      "method": "GET",
+      "path": "/apis/networking.k8s.io/v1/networkpolicies",
+      "purpose": "Read pod ingress/egress segmentation rules and incident-time quarantine policies (PR.IR-01, RS.MI-01)."
+    },
+    {
+      "method": "GET",
+      "path": "/apis/policy/v1/poddisruptionbudgets",
+      "purpose": "Verify availability guardrails (minAvailable/maxUnavailable) for voluntary disruptions (PR.IR-03)."
+    },
+    {
+      "method": "GET",
+      "path": "/apis/autoscaling/v2/horizontalpodautoscalers",
+      "purpose": "Verify autoscaling policies that maintain capacity under load (PR.IR-04)."
+    },
+    {
+      "method": "GET",
+      "path": "/apis/aquasecurity.github.io/v1alpha1/vulnerabilityreports",
+      "purpose": "Trivy Operator in-cluster image vulnerability reports per workload/container (ID.RA-01)."
+    },
+    {
+      "method": "GET",
+      "path": "/apis/aquasecurity.github.io/v1alpha1/sbomreports",
+      "purpose": "Trivy Operator per-workload CycloneDX SBOMs for software supply-chain monitoring (GV.SC-09)."
+    },
+    {
+      "method": "GET",
+      "path": "/apis/kyverno.io/v1/clusterpolicies",
+      "purpose": "Kyverno policies enforcing cosign signature/SLSA-attestation verification of images before admission (ID.RA-09)."
+    },
+    {
+      "method": "GET",
+      "path": "/apis/velero.io/v1/schedules",
+      "purpose": "Velero backup schedules - cadence, TTL, included namespaces, snapshotVolumes (RC.RP-03)."
+    },
+    {
+      "method": "GET",
+      "path": "/apis/velero.io/v1/backups",
+      "purpose": "Velero backup records - phase, formatVersion, expiration, errors - integrity of restoration assets (RC.RP-03)."
+    },
+    {
+      "method": "GET",
+      "path": "/apis/velero.io/v1/restores",
+      "purpose": "Velero restore records - recovery execution, phase Completed, warnings (RC.RP-01)."
+    }
+  ],
+  "controls": [
+    {
+      "ref": "ID.AM-02",
+      "api": "kubectl get deployments,statefulsets,daemonsets -A -o json",
+      "fields": [
+        "items[].metadata.namespace",
+        "items[].metadata.name",
+        "items[].metadata.labels.app",
+        "items[].spec.replicas",
+        "items[].spec.template.spec.containers[].image"
+      ],
+      "sample": {
+        "metadata": {
+          "namespace": "payments",
+          "name": "payments-api",
+          "labels": {
+            "app": "payments-api",
+            "team": "payments"
+          }
+        },
+        "spec": {
+          "replicas": 3,
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "name": "api",
+                  "image": "registry.acme.com/payments-api:2.14.1@sha256:9f2c1d3e5a7b9c0d1e2f3a4b5c6d7e8f90a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "ref": "ID.RA-01",
+      "api": "kubectl get vulnerabilityreports.aquasecurity.github.io -A -o json  (Trivy Operator)",
+      "fields": [
+        "metadata.labels['trivy-operator.resource.name']",
+        "report.artifact.repository",
+        "report.artifact.tag",
+        "report.summary.criticalCount",
+        "report.vulnerabilities[].vulnerabilityID",
+        "report.vulnerabilities[].fixedVersion"
+      ],
+      "sample": {
+        "metadata": {
+          "namespace": "payments",
+          "labels": {
+            "trivy-operator.resource.kind": "Deployment",
+            "trivy-operator.resource.name": "payments-api"
+          }
+        },
+        "report": {
+          "artifact": {
+            "repository": "registry.acme.com/payments-api",
+            "tag": "2.14.1"
+          },
+          "summary": {
+            "criticalCount": 0,
+            "highCount": 2,
+            "mediumCount": 11
+          },
+          "vulnerabilities": [
+            {
+              "vulnerabilityID": "CVE-2025-22868",
+              "severity": "HIGH",
+              "fixedVersion": "0.35.0",
+              "installedVersion": "0.31.0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ref": "ID.RA-09",
+      "api": "kubectl get clusterpolicies.kyverno.io verify-image-signatures -o json",
+      "fields": [
+        "spec.rules[].verifyImages[].imageReferences",
+        "spec.rules[].verifyImages[].attestors[].entries[].keys",
+        "spec.rules[].verifyImages[].attestations[].predicateType",
+        "spec.validationFailureAction",
+        "status.ready"
+      ],
+      "sample": {
+        "metadata": {
+          "name": "verify-image-signatures"
+        },
+        "spec": {
+          "validationFailureAction": "Enforce",
+          "rules": [
+            {
+              "name": "require-cosign-signature-and-slsa",
+              "verifyImages": [
+                {
+                  "imageReferences": [
+                    "registry.acme.com/*"
+                  ],
+                  "attestors": [
+                    {
+                      "entries": [
+                        {
+                          "keys": {
+                            "publicKeys": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE...\n-----END PUBLIC KEY-----",
+                            "rekor": {
+                              "url": "https://rekor.sigstore.dev"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "attestations": [
+                    {
+                      "predicateType": "https://slsa.dev/provenance/v1",
+                      "conditions": [
+                        {
+                          "all": [
+                            {
+                              "key": "{{ builder.id }}",
+                              "operator": "Equals",
+                              "value": "https://github.com/acme/.github/workflows/release.yaml"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "status": {
+          "ready": true
+        }
+      }
+    },
+    {
+      "ref": "GV.SC-09",
+      "api": "kubectl get sbomreports.aquasecurity.github.io -A -o json  (Trivy Operator CycloneDX SBOM per workload)",
+      "fields": [
+        "report.artifact.repository",
+        "report.artifact.digest",
+        "report.components.bomFormat",
+        "report.components.specVersion",
+        "report.summary.componentsCount"
+      ],
+      "sample": {
+        "metadata": {
+          "namespace": "payments",
+          "labels": {
+            "trivy-operator.resource.name": "payments-api"
+          }
+        },
+        "report": {
+          "artifact": {
+            "repository": "registry.acme.com/payments-api",
+            "digest": "sha256:9f2c1d3e5a7b9c0d1e2f3a4b5c6d7e8f90a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+          },
+          "components": {
+            "bomFormat": "CycloneDX",
+            "specVersion": "1.6",
+            "components": [
+              {
+                "type": "library",
+                "name": "golang.org/x/crypto",
+                "version": "v0.31.0"
+              }
+            ]
+          },
+          "summary": {
+            "componentsCount": 184
+          }
+        }
+      }
+    },
+    {
+      "ref": "PR.AA-01",
+      "api": "kubectl get serviceaccounts -A -o json",
+      "fields": [
+        "items[].metadata.namespace",
+        "items[].metadata.name",
+        "items[].metadata.labels.team",
+        "items[].automountServiceAccountToken",
+        "items[].secrets"
+      ],
+      "sample": {
+        "metadata": {
+          "namespace": "payments",
+          "name": "payments-api",
+          "labels": {
+            "team": "payments"
+          }
+        },
+        "automountServiceAccountToken": true,
+        "secrets": []
+      }
+    },
+    {
+      "ref": "PR.AA-03",
+      "api": "kubectl create -f tokenreview.yaml  (POST /apis/authentication.k8s.io/v1/tokenreviews)",
+      "fields": [
+        "status.authenticated",
+        "status.user.username",
+        "status.user.groups",
+        "status.audiences"
+      ],
+      "sample": {
+        "apiVersion": "authentication.k8s.io/v1",
+        "kind": "TokenReview",
+        "status": {
+          "authenticated": true,
+          "user": {
+            "username": "oidc:jane.doe@acme.com",
+            "groups": [
+              "oidc:platform-admins",
+              "system:authenticated"
+            ]
+          },
+          "audiences": [
+            "https://kubernetes.default.svc.cluster.local"
+          ]
+        }
+      }
+    },
+    {
+      "ref": "PR.AA-05",
+      "api": "kubectl get clusterrolebindings -o json",
+      "fields": [
+        "roleRef.name",
+        "subjects",
+        "metadata.name"
+      ],
+      "sample": {
+        "metadata": {
+          "name": "acme-platform-admins"
+        },
+        "roleRef": {
+          "apiGroup": "rbac.authorization.k8s.io",
+          "kind": "ClusterRole",
+          "name": "cluster-admin"
+        },
+        "subjects": [
+          {
+            "kind": "Group",
+            "name": "oidc:platform-admins",
+            "apiGroup": "rbac.authorization.k8s.io"
+          }
+        ]
+      }
+    },
+    {
+      "ref": "PR.DS-01",
+      "api": "kubectl get pod kube-apiserver-node1 -n kube-system -o json  (flag --encryption-provider-config) + mounted EncryptionConfiguration",
+      "fields": [
+        "spec.containers[].command (--encryption-provider-config=/etc/kubernetes/enc/enc.yaml)",
+        "resources[].resources (secrets)",
+        "resources[].providers[].aescbc.keys[].name",
+        "resources[].providers (identity last)"
+      ],
+      "sample": {
+        "kind": "EncryptionConfiguration",
+        "apiVersion": "apiserver.config.k8s.io/v1",
+        "resources": [
+          {
+            "resources": [
+              "secrets"
+            ],
+            "providers": [
+              {
+                "aescbc": {
+                  "keys": [
+                    {
+                      "name": "key1",
+                      "secret": "<redacted>"
+                    }
+                  ]
+                }
+              },
+              {
+                "identity": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "ref": "PR.PS-01",
+      "api": "kube-bench run --benchmark cis-1.10 --json",
+      "fields": [
+        "Controls[].id",
+        "Controls[].text",
+        "Controls[].tests[].results[].status",
+        "Totals.total_pass",
+        "Totals.total_fail"
+      ],
+      "sample": {
+        "Controls": [
+          {
+            "id": "1.4.1",
+            "text": "Ensure that the --encryption-provider-config argument is set as appropriate (Manual)",
+            "tests": [
+              {
+                "results": [
+                  {
+                    "test_number": "1.4.1",
+                    "status": "PASS",
+                    "actual_value": "--encryption-provider-config=/etc/kubernetes/enc/enc.yaml"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "Totals": {
+          "total_pass": 117,
+          "total_fail": 4,
+          "total_warn": 6,
+          "total_info": 0
+        }
+      }
+    },
+    {
+      "ref": "PR.PS-04",
+      "api": "kubectl get pod kube-apiserver-node1 -n kube-system -o json  (flags --audit-policy-file/--audit-log-path) + /var/log/kubernetes/audit.log",
+      "fields": [
+        "spec.containers[].command (--audit-policy-file, --audit-log-path, --audit-log-maxage)",
+        "verb",
+        "user.username",
+        "objectRef.resource",
+        "responseStatus.code"
+      ],
+      "sample": {
+        "kind": "Event",
+        "apiVersion": "audit.k8s.io/v1",
+        "level": "Metadata",
+        "verb": "create",
+        "user": {
+          "username": "system:serviceaccount:payments:payments-api",
+          "groups": [
+            "system:serviceaccounts",
+            "system:authenticated"
+          ]
+        },
+        "objectRef": {
+          "resource": "secrets",
+          "namespace": "payments",
+          "name": "db-creds",
+          "apiVersion": "v1"
+        },
+        "responseStatus": {
+          "code": 201
+        },
+        "requestReceivedTimestamp": "2026-10-06T14:03:11.412000Z"
+      }
+    },
+    {
+      "ref": "PR.PS-05",
+      "api": "kubectl get namespaces -o json  (pod-security.kubernetes.io/* labels) + kubectl get constraints.templates.gatekeeper.sh -A",
+      "fields": [
+        "metadata.name",
+        "metadata.labels['pod-security.kubernetes.io/enforce']",
+        "metadata.labels['pod-security.kubernetes.io/audit']",
+        "metadata.labels['pod-security.kubernetes.io/warn']"
+      ],
+      "sample": {
+        "metadata": {
+          "name": "payments",
+          "labels": {
+            "pod-security.kubernetes.io/enforce": "restricted",
+            "pod-security.kubernetes.io/enforce-version": "v1.32",
+            "pod-security.kubernetes.io/audit": "restricted",
+            "pod-security.kubernetes.io/warn": "restricted"
+          }
+        }
+      }
+    },
+    {
+      "ref": "PR.IR-01",
+      "api": "kubectl get networkpolicies -A -o json",
+      "fields": [
+        "metadata.namespace",
+        "metadata.name",
+        "spec.podSelector.matchLabels",
+        "spec.policyTypes",
+        "spec.ingress[].from[].podSelector",
+        "spec.egress[].to[].ipBlock.cidr"
+      ],
+      "sample": {
+        "metadata": {
+          "namespace": "payments",
+          "name": "payments-api-ingress"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "payments-api"
+            }
+          },
+          "policyTypes": [
+            "Ingress",
+            "Egress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 8443
+                }
+              ]
+            }
+          ],
+          "egress": [
+            {
+              "to": [
+                {
+                  "ipBlock": {
+                    "cidr": "10.20.0.0/16"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "ref": "PR.IR-03",
+      "api": "kubectl get poddisruptionbudgets -A -o json",
+      "fields": [
+        "metadata.namespace",
+        "metadata.name",
+        "spec.minAvailable",
+        "status.currentHealthy",
+        "status.disruptionsAllowed"
+      ],
+      "sample": {
+        "metadata": {
+          "namespace": "payments",
+          "name": "payments-api-pdb"
+        },
+        "spec": {
+          "minAvailable": 2
+        },
+        "status": {
+          "currentHealthy": 3,
+          "desiredHealthy": 2,
+          "disruptionsAllowed": 1
+        }
+      }
+    },
+    {
+      "ref": "PR.IR-04",
+      "api": "kubectl get horizontalpodautoscalers.autoscaling/v2 -A -o json",
+      "fields": [
+        "spec.scaleTargetRef.name",
+        "spec.minReplicas",
+        "spec.maxReplicas",
+        "spec.metrics[].resource.target.averageUtilization",
+        "status.currentReplicas"
+      ],
+      "sample": {
+        "metadata": {
+          "namespace": "payments",
+          "name": "payments-api-hpa"
+        },
+        "spec": {
+          "scaleTargetRef": {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "name": "payments-api"
+          },
+          "minReplicas": 3,
+          "maxReplicas": 20,
+          "metrics": [
+            {
+              "type": "Resource",
+              "resource": {
+                "name": "cpu",
+                "target": {
+                  "type": "Utilization",
+                  "averageUtilization": 70
+                }
+              }
+            }
+          ]
+        },
+        "status": {
+          "currentReplicas": 4,
+          "desiredReplicas": 4
+        }
+      }
+    },
+    {
+      "ref": "DE.CM-01",
+      "api": "hubble observe --namespace payments --verdict DROPPED -o jsonpb  (Cilium/Hubble network flow logs)",
+      "fields": [
+        "flow.verdict",
+        "flow.IP.source",
+        "flow.IP.destination",
+        "flow.l4.TCP.destination_port",
+        "flow.drop_reason_desc",
+        "flow.traffic_direction"
+      ],
+      "sample": {
+        "flow": {
+          "verdict": "DROPPED",
+          "IP": {
+            "source": "10.244.2.17",
+            "destination": "169.254.169.254"
+          },
+          "l4": {
+            "TCP": {
+              "destination_port": 80
+            }
+          },
+          "drop_reason_desc": "POLICY_DENIED",
+          "traffic_direction": "EGRESS",
+          "time": "2026-10-06T03:12:44.901Z"
+        }
+      }
+    },
+    {
+      "ref": "DE.CM-09",
+      "api": "kubectl logs -n falco deploy/falco --tail=1000 | jq 'select(.rule != null)'  (Falco runtime rules)",
+      "fields": [
+        "rule",
+        "priority",
+        "output",
+        "output_fields['k8s.ns.name']",
+        "output_fields['k8s.pod.name']",
+        "output_fields['proc.cmdline']"
+      ],
+      "sample": {
+        "rule": "Terminal shell in container",
+        "priority": "Warning",
+        "output": "14:22:09.441027441: Warning A shell was spawned in a container with an attached terminal (evt.type=execve user=root command=bash -i container_id=a1b2c3d4e5f6)",
+        "output_fields": {
+          "k8s.ns.name": "payments",
+          "k8s.pod.name": "payments-api-7d9f4c6b5-x2vqm",
+          "proc.cmdline": "bash -i",
+          "container.id": "a1b2c3d4e5f6"
+        }
+      }
+    },
+    {
+      "ref": "RS.MI-01",
+      "api": "kubectl apply -f quarantine-netpol.yaml && kubectl get networkpolicy quarantine-payments-api -n payments -o json  (+ kubectl cordon <node>)",
+      "fields": [
+        "metadata.name",
+        "spec.podSelector.matchLabels",
+        "spec.policyTypes",
+        "spec.ingress",
+        "spec.egress"
+      ],
+      "sample": {
+        "metadata": {
+          "namespace": "payments",
+          "name": "quarantine-payments-api",
+          "labels": {
+            "created-by": "ir-runbook-7"
+          }
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "quarantine": "incident-1042"
+            }
+          },
+          "policyTypes": [
+            "Ingress",
+            "Egress"
+          ],
+          "ingress": [],
+          "egress": []
+        }
+      }
+    },
+    {
+      "ref": "RS.MI-02",
+      "api": "grep '\"verb\":\"delete\"' /var/log/kubernetes/audit.log | grep '\"resource\":\"pods\"'  (eviction/eradication of compromised workloads)",
+      "fields": [
+        "verb",
+        "user.username",
+        "objectRef.resource",
+        "objectRef.name",
+        "responseStatus.code",
+        "stageTimestamp"
+      ],
+      "sample": {
+        "kind": "Event",
+        "apiVersion": "audit.k8s.io/v1",
+        "verb": "delete",
+        "user": {
+          "username": "ir.automation@acme.com"
+        },
+        "objectRef": {
+          "resource": "pods",
+          "namespace": "payments",
+          "name": "payments-api-7d9f4c6b5-x2vqm"
+        },
+        "responseStatus": {
+          "code": 200
+        },
+        "stageTimestamp": "2026-10-06T03:15:02.100000Z"
+      }
+    },
+    {
+      "ref": "RC.RP-01",
+      "api": "kubectl get restores.velero.io -n velero -o json",
+      "fields": [
+        "spec.backupName",
+        "spec.includedNamespaces",
+        "status.phase",
+        "status.startTimestamp",
+        "status.completionTimestamp",
+        "status.warnings"
+      ],
+      "sample": {
+        "metadata": {
+          "namespace": "velero",
+          "name": "restore-payments-20261006"
+        },
+        "spec": {
+          "backupName": "schedule-nightly-202610060300",
+          "includedNamespaces": [
+            "payments"
+          ],
+          "existingResourcePolicy": "update"
+        },
+        "status": {
+          "phase": "Completed",
+          "startTimestamp": "2026-10-06T06:12:04Z",
+          "completionTimestamp": "2026-10-06T06:18:47Z",
+          "warnings": 0,
+          "errors": 0
+        }
+      }
+    },
+    {
+      "ref": "RC.RP-03",
+      "api": "kubectl get backups.velero.io,schedules.velero.io -n velero -o json  (+ velero backup describe <name>)",
+      "fields": [
+        "spec.storageLocation",
+        "spec.ttl",
+        "spec.snapshotVolumes",
+        "status.phase",
+        "status.formatVersion",
+        "status.expiration",
+        "status.progress.itemsBackedUp"
+      ],
+      "sample": {
+        "metadata": {
+          "namespace": "velero",
+          "name": "schedule-nightly-202610060300"
+        },
+        "spec": {
+          "storageLocation": "default",
+          "ttl": "720h0m0s",
+          "snapshotVolumes": true,
+          "includedNamespaces": [
+            "payments"
+          ]
+        },
+        "status": {
+          "phase": "Completed",
+          "formatVersion": "1.1.0",
+          "expiration": "2026-11-05T03:00:00Z",
+          "errors": 0,
+          "progress": {
+            "itemsBackedUp": 142,
+            "totalItems": 142
+          }
+        }
+      }
+    }
+  ]
+}

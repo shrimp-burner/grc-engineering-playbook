@@ -1,0 +1,1078 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integrations - every tool, API and draft response - GRC Engineering Playbook</title><style>:root{--page:#f6f7f9;--surface:#fff;--ink:#0b0f17;--ink2:#374151;--muted:#667085;--line:#e7eaef;--accent:#067a5b;--soft:#e8f4ef;--mono:ui-monospace,Consolas,monospace;--sans:"Geist","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);line-height:1.55}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+header{padding:44px 0 24px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+h1{font-size:33px;letter-spacing:-.03em;margin:10px 0 8px}h2{font-size:20px;margin:0 0 12px}h3{font-size:14px;margin:18px 0 8px;color:var(--ink2)}
+h2 .cnt{font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400}
+.muted{color:var(--muted)}.mono{font-family:var(--mono)}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:20px 0 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat .n{font-size:25px;font-weight:700;letter-spacing:-.03em}.stat .l{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+section{padding:28px 0;border-bottom:1px solid var(--line)}
+.kv{color:var(--ink2);font-size:13.5px;margin:0 0 14px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:8px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:#fbfcfd}
+tr.cat td{background:var(--soft);font-family:var(--mono);font-size:11px;color:#14453a}
+td.ref{font-family:var(--mono);font-size:12px;color:var(--accent);white-space:nowrap}
+td.src{font-family:var(--mono);font-size:12px;color:var(--ink2);white-space:nowrap}
+td.msr{color:var(--ink2)}td.m{font-family:var(--mono);color:var(--accent)}
+td.p{font-family:var(--mono);font-size:11.5px;color:var(--ink2)}td.f{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.pill{font-family:var(--mono);font-size:9.5px;padding:2px 7px;border-radius:10px;white-space:nowrap}
+.pill.measured{background:var(--soft);color:var(--accent);border:1px solid #bfe0d3}
+.pill.suggested{background:#f2f4f7;color:var(--muted);border:1px solid var(--line)}
+.callout{border-left:3px solid var(--accent);background:var(--soft);border-radius:0 12px 12px 0;padding:14px 18px;color:#14453a;margin:16px 0}
+pre.samp{margin:0;background:#0b0f17;color:#cfe0d8;border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:11px;line-height:1.45;overflow:auto}
+footer{padding:24px 0 60px;color:var(--muted);font-size:12.5px}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}</style></head><body><div class="wrap">
+<header><div class="eyebrow">Integrations</div><h1>Every tool, its API, and a draft response</h1>
+<p class="muted">The evidence sources behind the NIST CSF 2.0 mapping: <b>Okta</b> for identity, <b>Jamf</b> for devices,
+<b>GitHub</b> for SDLC and supply chain, <b>Kubernetes</b> for workloads, <b>Wiz</b> for cloud posture, plus <b>AWS</b>
+for infrastructure config and governance platforms for program records. Each spec is a draft drawn from the vendor's API docs.</p>
+<div class="stats"><div class="stat"><div class="n">5</div><div class="l">API tools</div></div>
+<div class="stat"><div class="n">71</div><div class="l">endpoints</div></div>
+<div class="stat"><div class="n">49</div><div class="l">subcategories covered</div></div>
+<div class="stat"><div class="n">106</div><div class="l">in the framework</div></div>
+<div class="stat"><div class="n">31</div><div class="l">program sources</div></div></div></header>
+<section><h2>Okta <span class='cnt'>16 endpoints · 15 controls</span></h2><p class='kv'><b>Auth</b> OAuth 2.0 for Okta API: service app using client_credentials with private_key_jwt against https://&lt;org&gt;.okta.com/oauth2/v1/token, granted granular read scopes (okta.users.read, okta.logs.read, okta.apps.read, okta.groups.read, okta.factors.read, okta.policies.read, okta.authorizationServers.read, okta.eventHooks.read, okta.networkZones.read, okta.roles.read). Legacy API token via &#x27;Authorization: SSWS &lt;token&gt;&#x27; also works but is not least-privilege.<br><b>Base URL</b> <span class='mono'>https://&lt;org&gt;.okta.com/api/v1</span></p><table><thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr></thead><tbody><tr><td class='m'>GET</td><td class='p'>/users</td><td>Full identity inventory: lifecycle status (STAGED/PROVISIONED/ACTIVE/SUSPENDED/DEPROVISIONED), profile, credential provider, and lastLogin per user.</td></tr><tr><td class='m'>GET</td><td class='p'>/users/{userId}/factors</td><td>Enrolled authenticators per user: factorType, provider, enrollment status - the MFA-coverage and credential-binding record.</td></tr><tr><td class='m'>GET</td><td class='p'>/users/{userId}/roles</td><td>Admin role assignments for a user (SUPER_ADMIN, ORG_ADMIN, custom roles) with assignment status and timestamps.</td></tr><tr><td class='m'>GET</td><td class='p'>/users/{userId}/groups</td><td>Group memberships per user, supporting periodic entitlement review.</td></tr><tr><td class='m'>GET</td><td class='p'>/groups</td><td>Group inventory - the entitlement containers that drive application access.</td></tr><tr><td class='m'>GET</td><td class='p'>/groups/rules</td><td>Group rules that automate entitlement assignment from attribute expressions (e.g., department).</td></tr><tr><td class='m'>GET</td><td class='p'>/apps</td><td>Application instances (SSO-integrated SaaS and supplier-provided services): label, status, signOnMode, created.</td></tr><tr><td class='m'>GET</td><td class='p'>/apps/{appId}/groups</td><td>Group assignments per app with priority, showing assignment scope used to rank app criticality.</td></tr><tr><td class='m'>GET</td><td class='p'>/policies?type=PASSWORD</td><td>Password policies: complexity, history, age, lockout - the credential-strength standard.</td></tr><tr><td class='m'>GET</td><td class='p'>/policies?type=MFA_ENROLL</td><td>MFA enrollment policies: which authenticators are required, for which groups.</td></tr><tr><td class='m'>GET</td><td class='p'>/policies?type=OKTA_SIGN_ON</td><td>Global session policies: session lifetime, idle timeout, and factor requirements.</td></tr><tr><td class='m'>GET</td><td class='p'>/authorizationServers</td><td>Custom authorization servers issuing OAuth/OIDC tokens for APIs.</td></tr><tr><td class='m'>GET</td><td class='p'>/authorizationServers/{authServerId}/credentials/keys</td><td>Token signing keys (JWKS) with status ACTIVE/NEXT/EXPIRED and rotation expiry - assertion integrity evidence.</td></tr><tr><td class='m'>GET</td><td class='p'>/logs</td><td>System Log query (since/until/filter/q, cursor pagination): authentication, session, lifecycle, admin, policy-evaluation, and threat events.</td></tr><tr><td class='m'>GET</td><td class='p'>/eventHooks</td><td>Event hooks streaming System Log events to SIEM/SOAR endpoints, with ACTIVE status and subscribed event types.</td></tr><tr><td class='m'>GET</td><td class='p'>/zones</td><td>Network zones (IP/Dynamic) consumed by sign-on policies to gate access by source network.</td></tr></tbody></table><h3>Controls this tool evidences</h3><table><thead><tr><th>Ref</th><th>API</th><th>Fields</th><th>Draft response</th></tr></thead><tbody><tr><td class='ref'>PR.AA-01</td><td class='p'>GET /api/v1/users</td><td class='f'>id, status, profile.login, credentials.provider.type, lastLogin</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;00u1a2b3c4d5e6f7g8h9&quot;,
+  &quot;status&quot;: &quot;ACTIVE&quot;,
+  &quot;profile&quot;: {
+    &quot;login&quot;: &quot;jane.doe@acme.com&quot;,
+    &quot;email&quot;: &quot;jane.doe@acme.com&quot;
+  },
+  &quot;credentials&quot;: {
+    &quot;provider&quot;: {
+      &quot;type&quot;: &quot;OKTA&quot;
+    }
+  },
+  &quot;lastLogin&quot;: &quot;2026-10-05T14:22:11.000Z&quot;
+}</pre></td></tr><tr><td class='ref'>PR.AA-02</td><td class='p'>GET /api/v1/users/{userId}/factors</td><td class='f'>factorType, provider, status, profile.credentialId, created</td><td><pre class='samp'>{
+  &quot;factorType&quot;: &quot;push&quot;,
+  &quot;provider&quot;: &quot;OKTA&quot;,
+  &quot;status&quot;: &quot;ACTIVE&quot;,
+  &quot;profile&quot;: {
+    &quot;credentialId&quot;: &quot;opf1abc2def3ghi4jkl5&quot;
+  },
+  &quot;created&quot;: &quot;2026-03-11T09:04:00.000Z&quot;
+}</pre></td></tr><tr><td class='ref'>PR.AA-03</td><td class='p'>GET /api/v1/users/{userId}/factors</td><td class='f'>factorType, status</td><td><pre class='samp'>{
+  &quot;factorType&quot;: &quot;push&quot;,
+  &quot;status&quot;: &quot;ACTIVE&quot;
+}</pre></td></tr><tr><td class='ref'>PR.AA-04</td><td class='p'>GET /api/v1/authorizationServers/{authServerId}/credentials/keys</td><td class='f'>kty, use, kid, status, expiresAt</td><td><pre class='samp'>{
+  &quot;kty&quot;: &quot;RSA&quot;,
+  &quot;use&quot;: &quot;sig&quot;,
+  &quot;kid&quot;: &quot;sJdV6qzKk0aL7yG7u0w9x1c2b3n4m5&quot;,
+  &quot;status&quot;: &quot;ACTIVE&quot;,
+  &quot;expiresAt&quot;: &quot;2026-12-31T23:59:59.000Z&quot;
+}</pre></td></tr><tr><td class='ref'>PR.AA-05</td><td class='p'>GET /api/v1/groups/rules</td><td class='f'>name, status, conditions.expression.value, actions.assignUserToGroups.groupIds</td><td><pre class='samp'>{
+  &quot;name&quot;: &quot;Engineering to Dev Apps&quot;,
+  &quot;status&quot;: &quot;ACTIVE&quot;,
+  &quot;conditions&quot;: {
+    &quot;expression&quot;: {
+      &quot;value&quot;: &quot;user.department==\&quot;Engineering\&quot;&quot;
+    }
+  },
+  &quot;actions&quot;: {
+    &quot;assignUserToGroups&quot;: {
+      &quot;groupIds&quot;: [
+        &quot;00g1x7y8z9a0b1c2d3e4&quot;
+      ]
+    }
+  }
+}</pre></td></tr><tr><td class='ref'>GV.RR-02</td><td class='p'>GET /api/v1/users/{userId}/roles</td><td class='f'>id, type, status, assignmentType, created</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;JBCUYUC7IRCVGS7IFG53&quot;,
+  &quot;type&quot;: &quot;ORG_ADMIN&quot;,
+  &quot;status&quot;: &quot;ACTIVE&quot;,
+  &quot;assignmentType&quot;: &quot;USER&quot;,
+  &quot;created&quot;: &quot;2026-01-15T17:00:12.000Z&quot;
+}</pre></td></tr><tr><td class='ref'>GV.SC-10</td><td class='p'>GET /api/v1/logs?filter=eventType eq &quot;user.lifecycle.deactivate&quot;</td><td class='f'>eventType, published, actor.alternateId, target.alternateId, outcome.result</td><td><pre class='samp'>{
+  &quot;eventType&quot;: &quot;user.lifecycle.deactivate&quot;,
+  &quot;published&quot;: &quot;2026-09-30T16:41:03.000Z&quot;,
+  &quot;actor&quot;: {
+    &quot;alternateId&quot;: &quot;offboarding@acme.com&quot;
+  },
+  &quot;target&quot;: [
+    {
+      &quot;alternateId&quot;: &quot;contractor@vendor.com&quot;
+    }
+  ],
+  &quot;outcome&quot;: {
+    &quot;result&quot;: &quot;SUCCESS&quot;
+  }
+}</pre></td></tr><tr><td class='ref'>ID.AM-04</td><td class='p'>GET /api/v1/apps</td><td class='f'>id, label, name, status, signOnMode</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;0oa1b2c3d4e5f6g7h8i9&quot;,
+  &quot;label&quot;: &quot;Salesforce&quot;,
+  &quot;name&quot;: &quot;salesforce&quot;,
+  &quot;status&quot;: &quot;ACTIVE&quot;,
+  &quot;signOnMode&quot;: &quot;SAML_2_0&quot;
+}</pre></td></tr><tr><td class='ref'>ID.AM-05</td><td class='p'>GET /api/v1/apps/{appId}/groups</td><td class='f'>id, priority, profile.name, lastUpdated</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;00g9x8y7z6a5b4c3d2e1&quot;,
+  &quot;priority&quot;: 1,
+  &quot;profile&quot;: {
+    &quot;name&quot;: &quot;Finance-App-Admins&quot;
+  },
+  &quot;lastUpdated&quot;: &quot;2026-08-12T10:05:44.000Z&quot;
+}</pre></td></tr><tr><td class='ref'>DE.CM-03</td><td class='p'>GET /api/v1/logs?filter=eventType eq &quot;user.session.start&quot;</td><td class='f'>eventType, published, actor.alternateId, client.ipAddress, outcome.result</td><td><pre class='samp'>{
+  &quot;eventType&quot;: &quot;user.session.start&quot;,
+  &quot;published&quot;: &quot;2026-10-06T08:12:47.000Z&quot;,
+  &quot;actor&quot;: {
+    &quot;alternateId&quot;: &quot;jane.doe@acme.com&quot;
+  },
+  &quot;client&quot;: {
+    &quot;ipAddress&quot;: &quot;203.0.113.42&quot;
+  },
+  &quot;outcome&quot;: {
+    &quot;result&quot;: &quot;SUCCESS&quot;
+  }
+}</pre></td></tr><tr><td class='ref'>RS.AN-06</td><td class='p'>GET /api/v1/logs?filter=eventType eq &quot;user.account.privilege.grant&quot;</td><td class='f'>uuid, eventType, published, actor.alternateId, outcome.result</td><td><pre class='samp'>{
+  &quot;uuid&quot;: &quot;a1b2c3d4-5678-4000-8000-aa00bb11cc22&quot;,
+  &quot;eventType&quot;: &quot;user.account.privilege.grant&quot;,
+  &quot;published&quot;: &quot;2026-10-02T19:55:31.000Z&quot;,
+  &quot;actor&quot;: {
+    &quot;alternateId&quot;: &quot;sec.analyst@acme.com&quot;
+  },
+  &quot;outcome&quot;: {
+    &quot;result&quot;: &quot;SUCCESS&quot;
+  }
+}</pre></td></tr><tr><td class='ref'>RS.MI-01</td><td class='p'>GET /api/v1/logs?filter=eventType sw &quot;user.lifecycle.&quot;</td><td class='f'>eventType, published, actor.alternateId, target.alternateId, outcome.result</td><td><pre class='samp'>{
+  &quot;eventType&quot;: &quot;user.lifecycle.suspend&quot;,
+  &quot;published&quot;: &quot;2026-10-04T02:14:09.000Z&quot;,
+  &quot;actor&quot;: {
+    &quot;alternateId&quot;: &quot;ir.automation@acme.com&quot;
+  },
+  &quot;target&quot;: [
+    {
+      &quot;alternateId&quot;: &quot;compromised.user@acme.com&quot;
+    }
+  ],
+  &quot;outcome&quot;: {
+    &quot;result&quot;: &quot;SUCCESS&quot;
+  }
+}</pre></td></tr><tr><td class='ref'>PR.IR-01</td><td class='p'>GET /api/v1/zones</td><td class='f'>id, name, type, status, usage, gateways</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;nz1a2b3c4d5e6f7g8h9i0&quot;,
+  &quot;name&quot;: &quot;Corporate HQ Egress&quot;,
+  &quot;type&quot;: &quot;IP&quot;,
+  &quot;status&quot;: &quot;ACTIVE&quot;,
+  &quot;usage&quot;: &quot;POLICY&quot;,
+  &quot;gateways&quot;: [
+    {
+      &quot;type&quot;: &quot;CIDR&quot;,
+      &quot;value&quot;: &quot;203.0.113.0/24&quot;
+    }
+  ]
+}</pre></td></tr><tr><td class='ref'>ID.RA-02</td><td class='p'>GET /api/v1/logs?filter=eventType eq &quot;security.threat.detected&quot;</td><td class='f'>eventType, severity, published, client.ipAddress, outcome.result</td><td><pre class='samp'>{
+  &quot;eventType&quot;: &quot;security.threat.detected&quot;,
+  &quot;severity&quot;: &quot;WARN&quot;,
+  &quot;published&quot;: &quot;2026-10-05T23:40:18.000Z&quot;,
+  &quot;client&quot;: {
+    &quot;ipAddress&quot;: &quot;198.51.100.77&quot;
+  },
+  &quot;outcome&quot;: {
+    &quot;result&quot;: &quot;DENY&quot;
+  }
+}</pre></td></tr><tr><td class='ref'>PR.PS-04</td><td class='p'>GET /api/v1/eventHooks</td><td class='f'>id, name, status, events.items, channel.config.uri</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;cal1a2b3c4d5e6f7g8h9i&quot;,
+  &quot;name&quot;: &quot;siem-system-log-stream&quot;,
+  &quot;status&quot;: &quot;ACTIVE&quot;,
+  &quot;events&quot;: {
+    &quot;items&quot;: [
+      &quot;user.session.start&quot;,
+      &quot;user.lifecycle.suspend&quot;
+    ]
+  },
+  &quot;channel&quot;: {
+    &quot;config&quot;: {
+      &quot;uri&quot;: &quot;https://siem.acme.com/okta/events&quot;
+    }
+  }
+}</pre></td></tr></tbody></table></section><section><h2>Jamf Pro <span class='cnt'>20 endpoints · 13 controls</span></h2><p class='kv'><b>Auth</b> OAuth2 client-credentials grant for a Jamf Pro API Client: POST {base_url}/v1/oauth/token with form-encoded client_id/client_secret (grant_type=client_credentials) returns a bearer access_token (short-lived, ~30 min default TTL; re-request when expired). Alternative: POST {base_url}/v1/auth/token with HTTP Basic credentials of a Jamf Pro API-role account; refresh via POST /v1/auth/refresh-token and revoke via POST /v1/auth/invalidate-token. The same bearer token is honored by classic /JSSResource endpoints (which live at the instance root, outside /api). Provision a least-privilege API role with only Read privileges for the endpoints below (Read Computers, Read Mobile Devices, Read Smart Computer Groups, Read Static Computer Groups, Read Policies, Read User-Initiated Enrollment, View Local Admin Password Audit History, Read Device Compliance Information); write commands (POST /v2/mdm/commands) are approval-gated per playbook decision D7 and are never issued autonomously.<br><b>Base URL</b> <span class='mono'>https://&lt;instance&gt;.jamfcloud.com/api</span></p><table><thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr></thead><tbody><tr><td class='m'>POST</td><td class='p'>/v1/oauth/token</td><td>OAuth2 client-credentials exchange: client_id + client_secret -&gt; bearer access_token for an API Client (least-privilege, secret-rotatable).</td></tr><tr><td class='m'>POST</td><td class='p'>/v1/auth/token</td><td>Basic-auth token exchange: HTTP Basic (API-role username/password) -&gt; bearer JWT; supported alternative for tenants not using API Clients (Jamf recommends API Clients as more secure and has not deprecated this path).</td></tr><tr><td class='m'>POST</td><td class='p'>/v1/auth/refresh-token</td><td>Refresh an unexpired bearer token issued via /v1/auth/token.</td></tr><tr><td class='m'>POST</td><td class='p'>/v1/auth/invalidate-token</td><td>Revoke the current bearer token on integration teardown/rotation.</td></tr><tr><td class='m'>GET</td><td class='p'>/v1/computers-inventory</td><td>Paginated macOS computer inventory (totalCount/results envelope; page, page-size, sort, RSQL filter params). section=GENERAL,HARDWARE,APPLICATIONS,SECURITY,PURCHASING,... trims the payload to the sections a control needs.</td></tr><tr><td class='m'>GET</td><td class='p'>/v1/computers-inventory/{id}</td><td>Single computer inventory record for drill-down on one device.</td></tr><tr><td class='m'>GET</td><td class='p'>/v1/computers-inventory-detail/{id}</td><td>Full detail record: applications, localUserAccounts, certificates, configurationProfiles and groupMemberships (groupId/groupName/smartGroup) for one computer.</td></tr><tr><td class='m'>GET</td><td class='p'>/v2/mobile-devices</td><td>Paginated iOS/iPadOS/tvOS device inventory with RSQL filter; the v1 equivalent is deprecated, use v2.</td></tr><tr><td class='m'>GET</td><td class='p'>/v2/mobile-devices/{id}/detail</td><td>Full mobile device detail incl. security block (activationLockEnabled, passcodeCompliant, hardwareEncryption, jailBreakDetected) and managementId used for MDM commands.</td></tr><tr><td class='m'>GET</td><td class='p'>/v2/patch-software-title-configurations</td><td>List of configured patch titles (third-party + Apple) that Jamf tracks for version currency; classic /JSSResource/patchsoftwaretitles is deprecated in its favor.</td></tr><tr><td class='m'>GET</td><td class='p'>/v2/patch-software-title-configurations/{id}/patch-summary/versions</td><td>Per-version install counts for one patch title - quantifies how many devices still run old, unpatched software versions.</td></tr><tr><td class='m'>GET</td><td class='p'>/v2/patch-policies</td><td>Patch policies that enforce version/deadline-driven installs; pair with GET /v2/patch-policies/{id}/logs for per-device outcomes.</td></tr><tr><td class='m'>GET</td><td class='p'>/v1/managed-software-updates/update-statuses/computers/{id}</td><td>macOS managed software-update state (download/install/available) for one computer, evidencing OS-update delivery.</td></tr><tr><td class='m'>GET</td><td class='p'>/v2/local-admin-password/settings</td><td>Jamf Managed Local Admin Passwords (LAPS) settings: auto-deploy and auto-rotation of the local admin password. Companion reads: /v2/local-admin-password/{clientManagementId}/accounts and /account/{username}/audit.</td></tr><tr><td class='m'>GET</td><td class='p'>/v2/local-admin-password/{clientManagementId}/account/{username}/audit</td><td>Audit trail of who viewed/rotated a managed local admin password - access-to-device-credentials is attributable.</td></tr><tr><td class='m'>POST</td><td class='p'>/v2/mdm/commands</td><td>Queue an MDM command (DEVICE_LOCK, ERASE_DEVICE, ENABLE_LOST_MODE, SET_RECOVERY_LOCK, RESTART_DEVICE...) against clientData[].managementId, e.g. erase with return-to-service for device recovery. WRITE action: execute only behind human approval (D7); evidence read is the command history/audit.</td></tr><tr><td class='m'>GET</td><td class='p'>/v1/conditional-access/device-compliance-information/computer/{deviceId}</td><td>Per-computer device-compliance state surfaced to conditional access (privilege: Read Device Compliance Information) - devices must report healthy state to keep access.</td></tr><tr><td class='m'>GET</td><td class='p'>/JSSResource/computergroups/id/{id}</td><td>Classic API (instance root, no /api prefix): smart computer group definition incl. criteria (name/search_type/value) - scoping used to detect unauthorized software and gate remediation.</td></tr><tr><td class='m'>GET</td><td class='p'>/JSSResource/policies/id/{id}</td><td>Classic API: policy detail incl. general.enabled and self_service payloads - policies deliver Self Service content such as security-awareness training.</td></tr><tr><td class='m'>GET</td><td class='p'>/JSSResource/usergroups/id/{id}</td><td>Classic API: smart user group definition (is_smart, criteria, users) - role-based scoping used to target specialized training and privileged device access.</td></tr></tbody></table><h3>Controls this tool evidences</h3><table><thead><tr><th>Ref</th><th>API</th><th>Fields</th><th>Draft response</th></tr></thead><tbody><tr><td class='ref'>ID.AM-01</td><td class='p'>GET /v1/computers-inventory</td><td class='f'>id, udid, general.name, hardware.model, hardware.serialNumber</td><td><pre class='samp'>{
+  &quot;totalCount&quot;: 2,
+  &quot;results&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;udid&quot;: &quot;B1F0A55E-9C4E-4B7E-8A21-6C02D4A9E701&quot;,
+      &quot;general&quot;: {
+        &quot;name&quot;: &quot;MBP-014&quot;
+      },
+      &quot;hardware&quot;: {
+        &quot;model&quot;: &quot;MacBook Pro 14-inch 2023&quot;,
+        &quot;serialNumber&quot;: &quot;C02VN0XJHTD6&quot;
+      }
+    }
+  ]
+}</pre></td></tr><tr><td class='ref'>ID.AM-02</td><td class='p'>GET /v1/computers-inventory?section=APPLICATIONS</td><td class='f'>general.name, applications[].name, applications[].version, applications[].path</td><td><pre class='samp'>{
+  &quot;general&quot;: {
+    &quot;name&quot;: &quot;MBP-014&quot;
+  },
+  &quot;applications&quot;: [
+    {
+      &quot;name&quot;: &quot;Google Chrome&quot;,
+      &quot;version&quot;: &quot;131.0.6778.86&quot;,
+      &quot;path&quot;: &quot;/Applications/Google Chrome.app&quot;
+    }
+  ]
+}</pre></td></tr><tr><td class='ref'>PR.PS-02</td><td class='p'>GET /v2/patch-software-title-configurations/{id}/patch-summary/versions</td><td class='f'>version, onVersion</td><td><pre class='samp'>{
+  &quot;version&quot;: &quot;6.4.1.51234&quot;,
+  &quot;onVersion&quot;: 94
+}</pre></td></tr><tr><td class='ref'>PR.PS-03</td><td class='p'>GET /v1/computers-inventory?section=HARDWARE,PURCHASING</td><td class='f'>general.name, hardware.model, hardware.serialNumber, purchasing.warrantyDate, purchasing.lifeExpectancy</td><td><pre class='samp'>{
+  &quot;general&quot;: {
+    &quot;name&quot;: &quot;MBP-014&quot;
+  },
+  &quot;hardware&quot;: {
+    &quot;model&quot;: &quot;MacBook Pro 14-inch 2023&quot;,
+    &quot;serialNumber&quot;: &quot;C02VN0XJHTD6&quot;
+  },
+  &quot;purchasing&quot;: {
+    &quot;warrantyDate&quot;: &quot;2027-08-01&quot;,
+    &quot;lifeExpectancy&quot;: 5
+  }
+}</pre></td></tr><tr><td class='ref'>PR.DS-10</td><td class='p'>GET /v1/computers-inventory?section=SECURITY</td><td class='f'>general.name, operatingSystem.fileVault2Status, diskEncryption.fileVault2Enabled, diskEncryption.fileVault2EnabledUserNames, security.recoveryLockEnabled</td><td><pre class='samp'>{
+  &quot;general&quot;: {
+    &quot;name&quot;: &quot;MBP-014&quot;
+  },
+  &quot;operatingSystem&quot;: {
+    &quot;fileVault2Status&quot;: &quot;ALL_ENCRYPTED&quot;
+  },
+  &quot;diskEncryption&quot;: {
+    &quot;fileVault2Enabled&quot;: true,
+    &quot;fileVault2EnabledUserNames&quot;: [
+      &quot;j.reid&quot;
+    ]
+  },
+  &quot;security&quot;: {
+    &quot;recoveryLockEnabled&quot;: true
+  }
+}</pre></td></tr><tr><td class='ref'>PR.AA-06</td><td class='p'>GET /v2/local-admin-password/settings</td><td class='f'>autoDeployEnabled, autoRotateEnabled, passwordRotationTime, autoRotateExpirationTime</td><td><pre class='samp'>{
+  &quot;autoDeployEnabled&quot;: true,
+  &quot;autoRotateEnabled&quot;: true,
+  &quot;passwordRotationTime&quot;: 3600,
+  &quot;autoRotateExpirationTime&quot;: 7776000
+}</pre></td></tr><tr><td class='ref'>PR.PS-05</td><td class='p'>GET /JSSResource/computergroups/id/{id}</td><td class='f'>name, is_smart, criteria[].criterion.name, criteria[].criterion.search_type, criteria[].criterion.value</td><td><pre class='samp'>{
+  &quot;computer_group&quot;: {
+    &quot;name&quot;: &quot;Unapproved Applications - Detected&quot;,
+    &quot;is_smart&quot;: true,
+    &quot;criteria&quot;: [
+      {
+        &quot;criterion&quot;: {
+          &quot;name&quot;: &quot;Application Title&quot;,
+          &quot;search_type&quot;: &quot;contains&quot;,
+          &quot;value&quot;: &quot;Tor Browser&quot;
+        }
+      }
+    ]
+  }
+}</pre></td></tr><tr><td class='ref'>PR.AT-01</td><td class='p'>GET /JSSResource/policies/id/{id}</td><td class='f'>general.name, general.enabled, self_service.use_for_self_service, self_service.self_service_description</td><td><pre class='samp'>{
+  &quot;policy&quot;: {
+    &quot;general&quot;: {
+      &quot;name&quot;: &quot;Security Awareness Training 2026&quot;,
+      &quot;enabled&quot;: true
+    },
+    &quot;self_service&quot;: {
+      &quot;use_for_self_service&quot;: true,
+      &quot;self_service_description&quot;: &quot;Complete your annual security-awareness training.&quot;
+    }
+  }
+}</pre></td></tr><tr><td class='ref'>PR.AT-02</td><td class='p'>GET /JSSResource/usergroups/id/{id}</td><td class='f'>name, is_smart, criteria[].criterion.name, criteria[].criterion.value</td><td><pre class='samp'>{
+  &quot;usergroup&quot;: {
+    &quot;name&quot;: &quot;Engineering - privileged staff&quot;,
+    &quot;is_smart&quot;: true,
+    &quot;criteria&quot;: [
+      {
+        &quot;criterion&quot;: {
+          &quot;name&quot;: &quot;Department&quot;,
+          &quot;search_type&quot;: &quot;is&quot;,
+          &quot;value&quot;: &quot;Engineering&quot;
+        }
+      }
+    ]
+  }
+}</pre></td></tr><tr><td class='ref'>PR.IR-02</td><td class='p'>GET /v2/mobile-devices/{id}/detail</td><td class='f'>name, managed, security.activationLockEnabled, security.passcodeCompliant, security.hardwareEncryption</td><td><pre class='samp'>{
+  &quot;name&quot;: &quot;IPD-0031&quot;,
+  &quot;managed&quot;: true,
+  &quot;security&quot;: {
+    &quot;activationLockEnabled&quot;: true,
+    &quot;passcodeCompliant&quot;: true,
+    &quot;hardwareEncryption&quot;: 3
+  }
+}</pre></td></tr><tr><td class='ref'>RC.RP-02</td><td class='p'>POST /v2/mdm/commands</td><td class='f'>commandData.commandType, clientData[].managementId, commandData.returnToService.enabled</td><td><pre class='samp'>{
+  &quot;clientData&quot;: [
+    {
+      &quot;managementId&quot;: &quot;b3b2ba67-1632-4eaf-bd1c-885a34fa456a&quot;
+    }
+  ],
+  &quot;commandData&quot;: {
+    &quot;commandType&quot;: &quot;ERASE_DEVICE&quot;,
+    &quot;returnToService&quot;: {
+      &quot;enabled&quot;: true
+    }
+  }
+}</pre></td></tr><tr><td class='ref'>RC.RP-05</td><td class='p'>GET /v1/computers-inventory?filter=general.remoteManagement.managed==true</td><td class='f'>general.name, general.lastEnrolledDate, general.lastContactTime, general.remoteManagement.managed, general.userApprovedMdm</td><td><pre class='samp'>{
+  &quot;general&quot;: {
+    &quot;name&quot;: &quot;MBP-014&quot;,
+    &quot;lastEnrolledDate&quot;: &quot;2026-10-02T09:14:00.000Z&quot;,
+    &quot;lastContactTime&quot;: &quot;2026-10-07T15:17:55.860Z&quot;,
+    &quot;remoteManagement&quot;: {
+      &quot;managed&quot;: true
+    },
+    &quot;userApprovedMdm&quot;: true
+  }
+}</pre></td></tr><tr><td class='ref'>DE.CM-03</td><td class='p'>GET /v1/computers-inventory</td><td class='f'>general.name, general.lastContactTime, general.reportDate, general.lastIpAddress, general.lastReportedIp</td><td><pre class='samp'>{
+  &quot;general&quot;: {
+    &quot;name&quot;: &quot;MBP-014&quot;,
+    &quot;lastContactTime&quot;: &quot;2026-10-07T15:17:55.86Z&quot;,
+    &quot;reportDate&quot;: &quot;2026-10-07T15:18:15.178Z&quot;,
+    &quot;lastIpAddress&quot;: &quot;10.10.4.22&quot;,
+    &quot;lastReportedIp&quot;: &quot;192.168.86.211&quot;
+  }
+}</pre></td></tr></tbody></table></section><section><h2>GitHub <span class='cnt'>14 endpoints · 14 controls</span></h2><p class='kv'><b>Auth</b> GitHub App installation token: sign a short-lived JWT with the App&#x27;s RSA private key (iss = App ID, iat/exp &lt;= 10 min), exchange it at POST /app/installations/{installation_id}/access_tokens for a ~1 hour installation access token scoped to the org&#x27;s repositories. Request read-only org + repository permissions (administration, code scanning alerts, secret scanning alerts, dependabot alerts, contents, actions, audit_log, environments, members). A fine-grained PAT is a fallback for orgs that cannot install an App.<br><b>Base URL</b> <span class='mono'>https://api.github.com</span></p><table><thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr></thead><tbody><tr><td class='m'>GET</td><td class='p'>/orgs/{org}/repos</td><td>Inventory the software, services, and systems the org manages (ID.AM-02).</td></tr><tr><td class='m'>GET</td><td class='p'>/orgs/{org}/code-scanning/alerts</td><td>List CodeQL/code scanning alerts across the org, including fixed (remediated) alerts identified by security testing (ID.IM-02, DE.CM-09).</td></tr><tr><td class='m'>GET</td><td class='p'>/orgs/{org}/dependabot/alerts</td><td>Aggregate open/validated third-party dependency vulnerabilities across the org (ID.RA-01).</td></tr><tr><td class='m'>GET</td><td class='p'>/repos/{owner}/{repo}/dependabot/alerts</td><td>Per-repository dependency advisories and their remediation state to show software is maintained/replaced commensurate with risk (PR.PS-02).</td></tr><tr><td class='m'>GET</td><td class='p'>/repos/{owner}/{repo}/attestations/{subject_digest}</td><td>Fetch build-provenance/SBOM artifact attestations for an artifact digest to verify authenticity and integrity before use (ID.RA-09).</td></tr><tr><td class='m'>GET</td><td class='p'>/orgs/{org}/rulesets</td><td>Read org-level rulesets that enforce supply-chain requirements (e.g. required dependency review and code scanning) on branches (GV.SC-05).</td></tr><tr><td class='m'>GET</td><td class='p'>/repos/{owner}/{repo}/dependency-graph/sbom</td><td>Retrieve the SPDX SBOM for a repository to monitor third-party components across the software life cycle (GV.SC-09).</td></tr><tr><td class='m'>GET</td><td class='p'>/orgs/{org}/actions/oidc/customization/sub</td><td>Read Actions OIDC subject-claim customization, evidencing short-lived workload federation instead of static cloud credentials (PR.AA-03).</td></tr><tr><td class='m'>GET</td><td class='p'>/repos/{owner}/{repo}/environments</td><td>List deployment environments, reviewers, and deployment branch policy enforcing separation of duties for production (PR.AA-05).</td></tr><tr><td class='m'>GET</td><td class='p'>/enterprises/{enterprise}/audit-log/streams</td><td>List configured audit-log streaming destinations, confirming log records are generated and forwarded for continuous monitoring (PR.PS-04).</td></tr><tr><td class='m'>GET</td><td class='p'>/orgs/{org}/actions/permissions/selected-actions</td><td>Read the org&#x27;s allowed-actions policy restricting which third-party Actions may execute (PR.PS-05).</td></tr><tr><td class='m'>GET</td><td class='p'>/repos/{owner}/{repo}/branches/{branch}/protection</td><td>Read branch protection rules (reviews, status checks, admin enforcement) that gate the secure SDLC (PR.PS-06).</td></tr><tr><td class='m'>GET</td><td class='p'>/orgs/{org}/secret-scanning/alerts</td><td>List secret-scanning alerts, including push-protection bypasses and credential validity, as data/runtime monitoring (DE.CM-09).</td></tr><tr><td class='m'>GET</td><td class='p'>/orgs/{org}/audit-log</td><td>Query the organization audit log recording investigator and administrative actions with actors and timestamps (events retained 180 days per GitHub docs) (RS.AN-06).</td></tr></tbody></table><h3>Controls this tool evidences</h3><table><thead><tr><th>Ref</th><th>API</th><th>Fields</th><th>Draft response</th></tr></thead><tbody><tr><td class='ref'>ID.AM-02</td><td class='p'>GET /orgs/{org}/repos</td><td class='f'>name, language, visibility, archived, updated_at, topics</td><td><pre class='samp'>{
+  &quot;name&quot;: &quot;acme-payments&quot;,
+  &quot;language&quot;: &quot;Go&quot;,
+  &quot;visibility&quot;: &quot;private&quot;,
+  &quot;archived&quot;: false,
+  &quot;updated_at&quot;: &quot;2026-09-30T12:00:00Z&quot;,
+  &quot;topics&quot;: [
+    &quot;service&quot;,
+    &quot;pci&quot;
+  ]
+}</pre></td></tr><tr><td class='ref'>ID.RA-01</td><td class='p'>GET /orgs/{org}/dependabot/alerts</td><td class='f'>number, state, dependency.package.ecosystem, security_advisory.severity, dependency.manifest_path</td><td><pre class='samp'>{
+  &quot;number&quot;: 128,
+  &quot;state&quot;: &quot;open&quot;,
+  &quot;dependency&quot;: {
+    &quot;package&quot;: {
+      &quot;ecosystem&quot;: &quot;npm&quot;
+    },
+    &quot;manifest_path&quot;: &quot;package-lock.json&quot;
+  },
+  &quot;security_advisory&quot;: {
+    &quot;ghsa_id&quot;: &quot;GHSA-35jh-r3h4-6jhm&quot;,
+    &quot;severity&quot;: &quot;high&quot;
+  }
+}</pre></td></tr><tr><td class='ref'>ID.RA-09</td><td class='p'>GET /repos/{owner}/{repo}/attestations/{subject_digest}</td><td class='f'>attestations[].repository_id, attestations[].bundle.mediaType, attestations[].bundle.dsseEnvelope.payloadType</td><td><pre class='samp'>{
+  &quot;attestations&quot;: [
+    {
+      &quot;repository_id&quot;: 123456789,
+      &quot;bundle&quot;: {
+        &quot;mediaType&quot;: &quot;application/vnd.dev.sigstore.bundle+json;version=0.3&quot;,
+        &quot;dsseEnvelope&quot;: {
+          &quot;payloadType&quot;: &quot;application/vnd.in-toto+json&quot;
+        }
+      }
+    }
+  ]
+}</pre></td></tr><tr><td class='ref'>ID.IM-02</td><td class='p'>GET /orgs/{org}/code-scanning/alerts</td><td class='f'>number, state, rule.id, rule.security_severity_level, tool.name, most_recent_instance.commit_sha</td><td><pre class='samp'>{
+  &quot;number&quot;: 42,
+  &quot;state&quot;: &quot;fixed&quot;,
+  &quot;rule&quot;: {
+    &quot;id&quot;: &quot;js/sql-injection&quot;,
+    &quot;security_severity_level&quot;: &quot;high&quot;
+  },
+  &quot;tool&quot;: {
+    &quot;name&quot;: &quot;CodeQL&quot;,
+    &quot;version&quot;: &quot;2.18.0&quot;
+  },
+  &quot;most_recent_instance&quot;: {
+    &quot;commit_sha&quot;: &quot;9f2c1d3e5a7b9c0d1e2f3a4b5c6d7e8f90a1b2c3&quot;
+  }
+}</pre></td></tr><tr><td class='ref'>GV.SC-05</td><td class='p'>GET /orgs/{org}/rulesets</td><td class='f'>name, target, enforcement, rules, conditions</td><td><pre class='samp'>{
+  &quot;name&quot;: &quot;supply-chain-gate&quot;,
+  &quot;target&quot;: &quot;branch&quot;,
+  &quot;enforcement&quot;: &quot;active&quot;,
+  &quot;rules&quot;: [
+    {
+      &quot;type&quot;: &quot;required_status_checks&quot;,
+      &quot;parameters&quot;: {
+        &quot;strict_required_status_checks_policy&quot;: true,
+        &quot;required_status_checks&quot;: [
+          {
+            &quot;context&quot;: &quot;dependency-review&quot;
+          }
+        ]
+      }
+    }
+  ]
+}</pre></td></tr><tr><td class='ref'>GV.SC-09</td><td class='p'>GET /repos/{owner}/{repo}/dependency-graph/sbom</td><td class='f'>sbom.spdxVersion, sbom.name, sbom.creationInfo.created, sbom.packages</td><td><pre class='samp'>{
+  &quot;sbom&quot;: {
+    &quot;spdxVersion&quot;: &quot;SPDX-2.3&quot;,
+    &quot;name&quot;: &quot;acme-payments&quot;,
+    &quot;creationInfo&quot;: {
+      &quot;created&quot;: &quot;2026-09-30T12:05:00Z&quot;
+    },
+    &quot;packages&quot;: [
+      {
+        &quot;name&quot;: &quot;golang.org/x/crypto&quot;,
+        &quot;versionInfo&quot;: &quot;v0.31.0&quot;,
+        &quot;licenseDeclared&quot;: &quot;BSD-3-Clause&quot;
+      }
+    ]
+  }
+}</pre></td></tr><tr><td class='ref'>PR.AA-03</td><td class='p'>GET /orgs/{org}/actions/oidc/customization/sub</td><td class='f'>use_default, include_claim_keys</td><td><pre class='samp'>{
+  &quot;use_default&quot;: false,
+  &quot;include_claim_keys&quot;: [
+    &quot;repo&quot;,
+    &quot;context&quot;,
+    &quot;job_workflow_ref&quot;
+  ]
+}</pre></td></tr><tr><td class='ref'>PR.AA-05</td><td class='p'>GET /repos/{owner}/{repo}/environments</td><td class='f'>environments[].name, environments[].protection_rules, environments[].deployment_branch_policy</td><td><pre class='samp'>{
+  &quot;environments&quot;: [
+    {
+      &quot;name&quot;: &quot;production&quot;,
+      &quot;protection_rules&quot;: [
+        {
+          &quot;type&quot;: &quot;required_reviewers&quot;,
+          &quot;reviewers&quot;: [
+            {
+              &quot;type&quot;: &quot;Team&quot;,
+              &quot;id&quot;: 42
+            }
+          ]
+        }
+      ],
+      &quot;deployment_branch_policy&quot;: {
+        &quot;protected_branches&quot;: true,
+        &quot;custom_branch_policies&quot;: false
+      }
+    }
+  ]
+}</pre></td></tr><tr><td class='ref'>PR.PS-02</td><td class='p'>GET /repos/{owner}/{repo}/dependabot/alerts</td><td class='f'>number, state, dependency.package.name, security_advisory.severity, auto_dismissed_at</td><td><pre class='samp'>{
+  &quot;number&quot;: 91,
+  &quot;state&quot;: &quot;fixed&quot;,
+  &quot;dependency&quot;: {
+    &quot;package&quot;: {
+      &quot;name&quot;: &quot;lodash&quot;
+    }
+  },
+  &quot;security_advisory&quot;: {
+    &quot;ghsa_id&quot;: &quot;GHSA-35jh-r3h4-6jhm&quot;,
+    &quot;severity&quot;: &quot;high&quot;
+  },
+  &quot;auto_dismissed_at&quot;: null
+}</pre></td></tr><tr><td class='ref'>PR.PS-04</td><td class='p'>GET /enterprises/{enterprise}/audit-log/streams</td><td class='f'>id, enabled, stream_type, stream_details, paused_at</td><td><pre class='samp'>{
+  &quot;id&quot;: 1,
+  &quot;enabled&quot;: true,
+  &quot;stream_type&quot;: &quot;Amazon S3&quot;,
+  &quot;stream_details&quot;: &quot;acme-audit-logs&quot;,
+  &quot;paused_at&quot;: null
+}</pre></td></tr><tr><td class='ref'>PR.PS-05</td><td class='p'>GET /orgs/{org}/actions/permissions/selected-actions</td><td class='f'>github_owned_allowed, verified_allowed, patterns_allowed</td><td><pre class='samp'>{
+  &quot;github_owned_allowed&quot;: true,
+  &quot;verified_allowed&quot;: true,
+  &quot;patterns_allowed&quot;: [
+    &quot;actions/*&quot;,
+    &quot;github/*&quot;,
+    &quot;acme-org/*&quot;
+  ]
+}</pre></td></tr><tr><td class='ref'>PR.PS-06</td><td class='p'>GET /repos/{owner}/{repo}/branches/{branch}/protection</td><td class='f'>required_pull_request_reviews, required_status_checks, enforce_admins, allow_force_pushes, required_linear_history</td><td><pre class='samp'>{
+  &quot;required_pull_request_reviews&quot;: {
+    &quot;required_approving_review_count&quot;: 2,
+    &quot;dismiss_stale_reviews&quot;: true
+  },
+  &quot;required_status_checks&quot;: {
+    &quot;strict&quot;: true,
+    &quot;contexts&quot;: [
+      &quot;CodeQL&quot;,
+      &quot;dependency-review&quot;
+    ]
+  },
+  &quot;enforce_admins&quot;: {
+    &quot;enabled&quot;: true
+  },
+  &quot;allow_force_pushes&quot;: {
+    &quot;enabled&quot;: false
+  }
+}</pre></td></tr><tr><td class='ref'>DE.CM-09</td><td class='p'>GET /orgs/{org}/secret-scanning/alerts</td><td class='f'>number, state, secret_type, validity, push_protection_bypassed</td><td><pre class='samp'>{
+  &quot;number&quot;: 7,
+  &quot;state&quot;: &quot;resolved&quot;,
+  &quot;secret_type&quot;: &quot;github_personal_access_token&quot;,
+  &quot;validity&quot;: &quot;inactive&quot;,
+  &quot;push_protection_bypassed&quot;: false
+}</pre></td></tr><tr><td class='ref'>RS.AN-06</td><td class='p'>GET /orgs/{org}/audit-log</td><td class='f'>action, actor, created_at, hashed_token, repo, operation_type</td><td><pre class='samp'>{
+  &quot;action&quot;: &quot;org.update_member_repository_permission&quot;,
+  &quot;actor&quot;: &quot;security-bot&quot;,
+  &quot;created_at&quot;: 1759846800000,
+  &quot;hashed_token&quot;: &quot;a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6&quot;,
+  &quot;repo&quot;: &quot;acme/acme-payments&quot;,
+  &quot;operation_type&quot;: &quot;modify&quot;
+}</pre></td></tr></tbody></table></section><section><h2>Kubernetes <span class='cnt'>18 endpoints · 20 controls</span></h2><p class='kv'><b>Auth</b> kubeconfig with a read-only ServiceAccount bound to a cluster-scoped view/audit ClusterRole; token minted via TokenRequest (short-lived, audience-bound). On managed clusters authenticate through the cloud identity mapped into Kubernetes RBAC: EKS &#x27;aws eks get-token&#x27; (aws-auth ConfigMap / access entries), AKS &#x27;kubelogin&#x27; with Entra ID, GKE &#x27;gke-gcloud-auth-plugin&#x27; with Google OIDC. x509 client certificates signed by the cluster CA are the fallback for self-managed (kubeadm) clusters.<br><b>Base URL</b> <span class='mono'>https://&lt;CLUSTER_ID&gt;.&lt;region&gt;.eks.amazonaws.com  (EKS) / https://&lt;host&gt;:6443 (self-managed)</span></p><table><thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr></thead><tbody><tr><td class='m'>GET</td><td class='p'>/apis/apps/v1/deployments</td><td>Inventory declared workloads (Deployments; also statefulsets/daemonsets) with images and replicas (ID.AM-02).</td></tr><tr><td class='m'>GET</td><td class='p'>/api/v1/pods</td><td>List running pods - the actual executed images, serviceAccount bindings, and node placement (ID.AM-02).</td></tr><tr><td class='m'>GET</td><td class='p'>/api/v1/serviceaccounts</td><td>Inventory workload identities and automountServiceAccountToken posture (PR.AA-01).</td></tr><tr><td class='m'>POST</td><td class='p'>/apis/authentication.k8s.io/v1/tokenreviews</td><td>Validate a bearer token against the configured authenticators (OIDC, x509, webhook) and return the resolved user/groups (PR.AA-03).</td></tr><tr><td class='m'>GET</td><td class='p'>/apis/rbac.authorization.k8s.io/v1/clusterrolebindings</td><td>Review cluster-wide RBAC bindings for least privilege (who holds cluster-admin etc.) (PR.AA-05).</td></tr><tr><td class='m'>GET</td><td class='p'>/apis/rbac.authorization.k8s.io/v1/clusterroles</td><td>Review aggregated ClusterRole rules for wildcard verbs/resources and separation of duties (PR.AA-05).</td></tr><tr><td class='m'>GET</td><td class='p'>/api/v1/namespaces/kube-system/pods</td><td>Read kube-apiserver static-pod manifest flags: --encryption-provider-config, --audit-policy-file, --audit-log-path, --oidc-issuer-url (PR.DS-01, PR.PS-04, PR.AA-03).</td></tr><tr><td class='m'>GET</td><td class='p'>/api/v1/namespaces</td><td>Read pod-security.kubernetes.io/enforce|audit|warn labels enforcing Pod Security Standards per namespace (PR.PS-05).</td></tr><tr><td class='m'>GET</td><td class='p'>/apis/admissionregistration.k8s.io/v1/validatingadmissionpolicies</td><td>List in-tree ValidatingAdmissionPolicies (CEL) blocking unauthorized workload specs at admission (PR.PS-05).</td></tr><tr><td class='m'>GET</td><td class='p'>/apis/networking.k8s.io/v1/networkpolicies</td><td>Read pod ingress/egress segmentation rules and incident-time quarantine policies (PR.IR-01, RS.MI-01).</td></tr><tr><td class='m'>GET</td><td class='p'>/apis/policy/v1/poddisruptionbudgets</td><td>Verify availability guardrails (minAvailable/maxUnavailable) for voluntary disruptions (PR.IR-03).</td></tr><tr><td class='m'>GET</td><td class='p'>/apis/autoscaling/v2/horizontalpodautoscalers</td><td>Verify autoscaling policies that maintain capacity under load (PR.IR-04).</td></tr><tr><td class='m'>GET</td><td class='p'>/apis/aquasecurity.github.io/v1alpha1/vulnerabilityreports</td><td>Trivy Operator in-cluster image vulnerability reports per workload/container (ID.RA-01).</td></tr><tr><td class='m'>GET</td><td class='p'>/apis/aquasecurity.github.io/v1alpha1/sbomreports</td><td>Trivy Operator per-workload CycloneDX SBOMs for software supply-chain monitoring (GV.SC-09).</td></tr><tr><td class='m'>GET</td><td class='p'>/apis/kyverno.io/v1/clusterpolicies</td><td>Kyverno policies enforcing cosign signature/SLSA-attestation verification of images before admission (ID.RA-09).</td></tr><tr><td class='m'>GET</td><td class='p'>/apis/velero.io/v1/schedules</td><td>Velero backup schedules - cadence, TTL, included namespaces, snapshotVolumes (RC.RP-03).</td></tr><tr><td class='m'>GET</td><td class='p'>/apis/velero.io/v1/backups</td><td>Velero backup records - phase, formatVersion, expiration, errors - integrity of restoration assets (RC.RP-03).</td></tr><tr><td class='m'>GET</td><td class='p'>/apis/velero.io/v1/restores</td><td>Velero restore records - recovery execution, phase Completed, warnings (RC.RP-01).</td></tr></tbody></table><h3>Controls this tool evidences</h3><table><thead><tr><th>Ref</th><th>API</th><th>Fields</th><th>Draft response</th></tr></thead><tbody><tr><td class='ref'>ID.AM-02</td><td class='p'>kubectl get deployments,statefulsets,daemonsets -A -o json</td><td class='f'>items[].metadata.namespace, items[].metadata.name, items[].metadata.labels.app, items[].spec.replicas, items[].spec.template.spec.containers[].image</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;namespace&quot;: &quot;payments&quot;,
+    &quot;name&quot;: &quot;payments-api&quot;,
+    &quot;labels&quot;: {
+      &quot;app&quot;: &quot;payments-api&quot;,
+      &quot;team&quot;: &quot;payments&quot;
+    }
+  },
+  &quot;spec&quot;: {
+    &quot;replicas&quot;: 3,
+    &quot;template&quot;: {
+      &quot;spec&quot;: {
+        &quot;containers&quot;: [
+          {
+            &quot;name&quot;: &quot;api&quot;,
+            &quot;image&quot;: &quot;registry.acme.com/payments-api:2.14.1@sha256:9f2c1d3e5a7b9c0d1e2f3a4b5c6d7e8f90a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6&quot;
+          }
+        ]
+      }
+    }
+  }
+}</pre></td></tr><tr><td class='ref'>ID.RA-01</td><td class='p'>kubectl get vulnerabilityreports.aquasecurity.github.io -A -o json  (Trivy Operator)</td><td class='f'>metadata.labels[&#x27;trivy-operator.resource.name&#x27;], report.artifact.repository, report.artifact.tag, report.summary.criticalCount, report.vulnerabilities[].vulnerabilityID, report.vulnerabilities[].fixedVersion</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;namespace&quot;: &quot;payments&quot;,
+    &quot;labels&quot;: {
+      &quot;trivy-operator.resource.kind&quot;: &quot;Deployment&quot;,
+      &quot;trivy-operator.resource.name&quot;: &quot;payments-api&quot;
+    }
+  },
+  &quot;report&quot;: {
+    &quot;artifact&quot;: {
+      &quot;repository&quot;: &quot;registry.acme.com/payments-api&quot;,
+      &quot;tag&quot;: &quot;2.14.1&quot;
+    },
+    &quot;summary&quot;: {
+      &quot;criticalCount&quot;: 0,
+      &quot;highCount&quot;: 2,
+      &quot;mediumCount&quot;: 11
+    },
+    &quot;vulnerabilities&quot;: [
+      {
+        &quot;vulnerabilityID&quot;: &quot;CVE-2025-22868&quot;,
+        &quot;severity&quot;: &quot;HIGH&quot;,
+        &quot;fixedVersion&quot;: &quot;0.35.0&quot;,
+        &quot;installedVersion&quot;: &quot;0.31.0&quot;
+      }
+    ]
+  }
+}</pre></td></tr><tr><td class='ref'>ID.RA-09</td><td class='p'>kubectl get clusterpolicies.kyverno.io verify-image-signatures -o json</td><td class='f'>spec.rules[].verifyImages[].imageReferences, spec.rules[].verifyImages[].attestors[].entries[].keys, spec.rules[].verifyImages[].attestations[].predicateType, spec.validationFailureAction, status.ready</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;name&quot;: &quot;verify-image-signatures&quot;
+  },
+  &quot;spec&quot;: {
+    &quot;validationFailureAction&quot;: &quot;Enforce&quot;,
+    &quot;rules&quot;: [
+      {
+        &quot;name&quot;: &quot;require-cosign-signature-and-slsa&quot;,
+        &quot;verifyImages&quot;: [
+          {
+            &quot;imageReferences&quot;: [
+              &quot;registry.acme.com/*&quot;
+            ],
+            &quot;attestors&quot;: [
+              {
+                &quot;entries&quot;: [
+                  {
+                    &quot;keys&quot;: {
+                      &quot;publicKeys&quot;: &quot;-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE...\n-----END PUBLIC KEY-----&quot;,
+                      &quot;rekor&quot;: {
+                        &quot;url&quot;: &quot;https://rekor.sigstore.dev&quot;
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            &quot;attestations&quot;: [
+              {
+                &quot;predicateType&quot;: &quot;https://slsa.dev/provenance/v1&quot;,
+                &quot;conditions&quot;: [
+                  {
+                    &quot;all&quot;: [
+                      {
+                        &quot;key&quot;: &quot;{{ builder.id }}&quot;,
+                        &quot;operator&quot;: &quot;Equals&quot;,
+                        &quot;value&quot;: &quot;https://github.com/acme/.github/workflows/release.yaml&quot;
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  &quot;status&quot;: {
+    &quot;ready&quot;: true
+  }
+}</pre></td></tr><tr><td class='ref'>GV.SC-09</td><td class='p'>kubectl get sbomreports.aquasecurity.github.io -A -o json  (Trivy Operator CycloneDX SBOM per workload)</td><td class='f'>report.artifact.repository, report.artifact.digest, report.components.bomFormat, report.components.specVersion, report.summary.componentsCount</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;namespace&quot;: &quot;payments&quot;,
+    &quot;labels&quot;: {
+      &quot;trivy-operator.resource.name&quot;: &quot;payments-api&quot;
+    }
+  },
+  &quot;report&quot;: {
+    &quot;artifact&quot;: {
+      &quot;repository&quot;: &quot;registry.acme.com/payments-api&quot;,
+      &quot;digest&quot;: &quot;sha256:9f2c1d3e5a7b9c0d1e2f3a4b5c6d7e8f90a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6&quot;
+    },
+    &quot;components&quot;: {
+      &quot;bomFormat&quot;: &quot;CycloneDX&quot;,
+      &quot;specVersion&quot;: &quot;1.6&quot;,
+      &quot;components&quot;: [
+        {
+          &quot;type&quot;: &quot;library&quot;,
+          &quot;name&quot;: &quot;golang.org/x/crypto&quot;,
+          &quot;version&quot;: &quot;v0.31.0&quot;
+        }
+      ]
+    },
+    &quot;summary&quot;: {
+      &quot;componentsCount&quot;: 184
+    }
+  }
+}</pre></td></tr><tr><td class='ref'>PR.AA-01</td><td class='p'>kubectl get serviceaccounts -A -o json</td><td class='f'>items[].metadata.namespace, items[].metadata.name, items[].metadata.labels.team, items[].automountServiceAccountToken, items[].secrets</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;namespace&quot;: &quot;payments&quot;,
+    &quot;name&quot;: &quot;payments-api&quot;,
+    &quot;labels&quot;: {
+      &quot;team&quot;: &quot;payments&quot;
+    }
+  },
+  &quot;automountServiceAccountToken&quot;: true,
+  &quot;secrets&quot;: []
+}</pre></td></tr><tr><td class='ref'>PR.AA-03</td><td class='p'>kubectl create -f tokenreview.yaml  (POST /apis/authentication.k8s.io/v1/tokenreviews)</td><td class='f'>status.authenticated, status.user.username, status.user.groups, status.audiences</td><td><pre class='samp'>{
+  &quot;apiVersion&quot;: &quot;authentication.k8s.io/v1&quot;,
+  &quot;kind&quot;: &quot;TokenReview&quot;,
+  &quot;status&quot;: {
+    &quot;authenticated&quot;: true,
+    &quot;user&quot;: {
+      &quot;username&quot;: &quot;oidc:jane.doe@acme.com&quot;,
+      &quot;groups&quot;: [
+        &quot;oidc:platform-admins&quot;,
+        &quot;system:authenticated&quot;
+      ]
+    },
+    &quot;audiences&quot;: [
+      &quot;https://kubernetes.default.svc.cluster.local&quot;
+    ]
+  }
+}</pre></td></tr><tr><td class='ref'>PR.AA-05</td><td class='p'>kubectl get clusterrolebindings -o json</td><td class='f'>roleRef.name, subjects, metadata.name</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;name&quot;: &quot;acme-platform-admins&quot;
+  },
+  &quot;roleRef&quot;: {
+    &quot;apiGroup&quot;: &quot;rbac.authorization.k8s.io&quot;,
+    &quot;kind&quot;: &quot;ClusterRole&quot;,
+    &quot;name&quot;: &quot;cluster-admin&quot;
+  },
+  &quot;subjects&quot;: [
+    {
+      &quot;kind&quot;: &quot;Group&quot;,
+      &quot;name&quot;: &quot;oidc:platform-admins&quot;,
+      &quot;apiGroup&quot;: &quot;rbac.authorization.k8s.io&quot;
+    }
+  ]
+}</pre></td></tr><tr><td class='ref'>PR.DS-01</td><td class='p'>kubectl get pod kube-apiserver-node1 -n kube-system -o json  (flag --encryption-provider-config) + mounted EncryptionConfiguration</td><td class='f'>spec.containers[].command (--encryption-provider-config=/etc/kubernetes/enc/enc.yaml), resources[].resources (secrets), resources[].providers[].aescbc.keys[].name, resources[].providers (identity last)</td><td><pre class='samp'>{
+  &quot;kind&quot;: &quot;EncryptionConfiguration&quot;,
+  &quot;apiVersion&quot;: &quot;apiserver.config.k8s.io/v1&quot;,
+  &quot;resources&quot;: [
+    {
+      &quot;resources&quot;: [
+        &quot;secrets&quot;
+      ],
+      &quot;providers&quot;: [
+        {
+          &quot;aescbc&quot;: {
+            &quot;keys&quot;: [
+              {
+                &quot;name&quot;: &quot;key1&quot;,
+                &quot;secret&quot;: &quot;&lt;redacted&gt;&quot;
+              }
+            ]
+          }
+        },
+        {
+          &quot;identity&quot;: {}
+        }
+      ]
+    }
+  ]
+}</pre></td></tr><tr><td class='ref'>PR.PS-01</td><td class='p'>kube-bench run --benchmark cis-1.10 --json</td><td class='f'>Controls[].id, Controls[].text, Controls[].tests[].results[].status, Totals.total_pass, Totals.total_fail</td><td><pre class='samp'>{
+  &quot;Controls&quot;: [
+    {
+      &quot;id&quot;: &quot;1.4.1&quot;,
+      &quot;text&quot;: &quot;Ensure that the --encryption-provider-config argument is set as appropriate (Manual)&quot;,
+      &quot;tests&quot;: [
+        {
+          &quot;results&quot;: [
+            {
+              &quot;test_number&quot;: &quot;1.4.1&quot;,
+              &quot;status&quot;: &quot;PASS&quot;,
+              &quot;actual_value&quot;: &quot;--encryption-provider-config=/etc/kubernetes/enc/enc.yaml&quot;
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  &quot;Totals&quot;: {
+    &quot;total_pass&quot;: 117,
+    &quot;total_fail&quot;: 4,
+    &quot;total_warn&quot;: 6,
+    &quot;total_info&quot;: 0
+  }
+}</pre></td></tr><tr><td class='ref'>PR.PS-04</td><td class='p'>kubectl get pod kube-apiserver-node1 -n kube-system -o json  (flags --audit-policy-file/--audit-log-path) + /var/log/kubernetes/audit.log</td><td class='f'>spec.containers[].command (--audit-policy-file, --audit-log-path, --audit-log-maxage), verb, user.username, objectRef.resource, responseStatus.code</td><td><pre class='samp'>{
+  &quot;kind&quot;: &quot;Event&quot;,
+  &quot;apiVersion&quot;: &quot;audit.k8s.io/v1&quot;,
+  &quot;level&quot;: &quot;Metadata&quot;,
+  &quot;verb&quot;: &quot;create&quot;,
+  &quot;user&quot;: {
+    &quot;username&quot;: &quot;system:serviceaccount:payments:payments-api&quot;,
+    &quot;groups&quot;: [
+      &quot;system:serviceaccounts&quot;,
+      &quot;system:authenticated&quot;
+    ]
+  },
+  &quot;objectRef&quot;: {
+    &quot;resource&quot;: &quot;secrets&quot;,
+    &quot;namespace&quot;: &quot;payments&quot;,
+    &quot;name&quot;: &quot;db-creds&quot;,
+    &quot;apiVersion&quot;: &quot;v1&quot;
+  },
+  &quot;responseStatus&quot;: {
+    &quot;code&quot;: 201
+  },
+  &quot;requestReceivedTimestamp&quot;: &quot;2026-10-06T14:03:11.412000Z&quot;
+}</pre></td></tr><tr><td class='ref'>PR.PS-05</td><td class='p'>kubectl get namespaces -o json  (pod-security.kubernetes.io/* labels) + kubectl get constraints.templates.gatekeeper.sh -A</td><td class='f'>metadata.name, metadata.labels[&#x27;pod-security.kubernetes.io/enforce&#x27;], metadata.labels[&#x27;pod-security.kubernetes.io/audit&#x27;], metadata.labels[&#x27;pod-security.kubernetes.io/warn&#x27;]</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;name&quot;: &quot;payments&quot;,
+    &quot;labels&quot;: {
+      &quot;pod-security.kubernetes.io/enforce&quot;: &quot;restricted&quot;,
+      &quot;pod-security.kubernetes.io/enforce-version&quot;: &quot;v1.32&quot;,
+      &quot;pod-security.kubernetes.io/audit&quot;: &quot;restricted&quot;,
+      &quot;pod-security.kubernetes.io/warn&quot;: &quot;restricted&quot;
+    }
+  }
+}</pre></td></tr><tr><td class='ref'>PR.IR-01</td><td class='p'>kubectl get networkpolicies -A -o json</td><td class='f'>metadata.namespace, metadata.name, spec.podSelector.matchLabels, spec.policyTypes, spec.ingress[].from[].podSelector, spec.egress[].to[].ipBlock.cidr</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;namespace&quot;: &quot;payments&quot;,
+    &quot;name&quot;: &quot;payments-api-ingress&quot;
+  },
+  &quot;spec&quot;: {
+    &quot;podSelector&quot;: {
+      &quot;matchLabels&quot;: {
+        &quot;app&quot;: &quot;payments-api&quot;
+      }
+    },
+    &quot;policyTypes&quot;: [
+      &quot;Ingress&quot;,
+      &quot;Egress&quot;
+    ],
+    &quot;ingress&quot;: [
+      {
+        &quot;from&quot;: [
+          {
+            &quot;podSelector&quot;: {
+              &quot;matchLabels&quot;: {
+                &quot;app&quot;: &quot;frontend&quot;
+              }
+            }
+          }
+        ],
+        &quot;ports&quot;: [
+          {
+            &quot;protocol&quot;: &quot;TCP&quot;,
+            &quot;port&quot;: 8443
+          }
+        ]
+      }
+    ],
+    &quot;egress&quot;: [
+      {
+        &quot;to&quot;: [
+          {
+            &quot;ipBlock&quot;: {
+              &quot;cidr&quot;: &quot;10.20.0.0/16&quot;
+            }
+          }
+        ]
+      }
+    ]
+  }
+}</pre></td></tr><tr><td class='ref'>PR.IR-03</td><td class='p'>kubectl get poddisruptionbudgets -A -o json</td><td class='f'>metadata.namespace, metadata.name, spec.minAvailable, status.currentHealthy, status.disruptionsAllowed</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;namespace&quot;: &quot;payments&quot;,
+    &quot;name&quot;: &quot;payments-api-pdb&quot;
+  },
+  &quot;spec&quot;: {
+    &quot;minAvailable&quot;: 2
+  },
+  &quot;status&quot;: {
+    &quot;currentHealthy&quot;: 3,
+    &quot;desiredHealthy&quot;: 2,
+    &quot;disruptionsAllowed&quot;: 1
+  }
+}</pre></td></tr><tr><td class='ref'>PR.IR-04</td><td class='p'>kubectl get horizontalpodautoscalers.autoscaling/v2 -A -o json</td><td class='f'>spec.scaleTargetRef.name, spec.minReplicas, spec.maxReplicas, spec.metrics[].resource.target.averageUtilization, status.currentReplicas</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;namespace&quot;: &quot;payments&quot;,
+    &quot;name&quot;: &quot;payments-api-hpa&quot;
+  },
+  &quot;spec&quot;: {
+    &quot;scaleTargetRef&quot;: {
+      &quot;apiVersion&quot;: &quot;apps/v1&quot;,
+      &quot;kind&quot;: &quot;Deployment&quot;,
+      &quot;name&quot;: &quot;payments-api&quot;
+    },
+    &quot;minReplicas&quot;: 3,
+    &quot;maxReplicas&quot;: 20,
+    &quot;metrics&quot;: [
+      {
+        &quot;type&quot;: &quot;Resource&quot;,
+        &quot;resource&quot;: {
+          &quot;name&quot;: &quot;cpu&quot;,
+          &quot;target&quot;: {
+            &quot;type&quot;: &quot;Utilization&quot;,
+            &quot;averageUtilization&quot;: 70
+          }
+        }
+      }
+    ]
+  },
+  &quot;status&quot;: {
+    &quot;currentReplicas&quot;: 4,
+    &quot;desiredReplicas&quot;: 4
+  }
+}</pre></td></tr><tr><td class='ref'>DE.CM-01</td><td class='p'>hubble observe --namespace payments --verdict DROPPED -o jsonpb  (Cilium/Hubble network flow logs)</td><td class='f'>flow.verdict, flow.IP.source, flow.IP.destination, flow.l4.TCP.destination_port, flow.drop_reason_desc, flow.traffic_direction</td><td><pre class='samp'>{
+  &quot;flow&quot;: {
+    &quot;verdict&quot;: &quot;DROPPED&quot;,
+    &quot;IP&quot;: {
+      &quot;source&quot;: &quot;10.244.2.17&quot;,
+      &quot;destination&quot;: &quot;169.254.169.254&quot;
+    },
+    &quot;l4&quot;: {
+      &quot;TCP&quot;: {
+        &quot;destination_port&quot;: 80
+      }
+    },
+    &quot;drop_reason_desc&quot;: &quot;POLICY_DENIED&quot;,
+    &quot;traffic_direction&quot;: &quot;EGRESS&quot;,
+    &quot;time&quot;: &quot;2026-10-06T03:12:44.901Z&quot;
+  }
+}</pre></td></tr><tr><td class='ref'>DE.CM-09</td><td class='p'>kubectl logs -n falco deploy/falco --tail=1000 | jq &#x27;select(.rule != null)&#x27;  (Falco runtime rules)</td><td class='f'>rule, priority, output, output_fields[&#x27;k8s.ns.name&#x27;], output_fields[&#x27;k8s.pod.name&#x27;], output_fields[&#x27;proc.cmdline&#x27;]</td><td><pre class='samp'>{
+  &quot;rule&quot;: &quot;Terminal shell in container&quot;,
+  &quot;priority&quot;: &quot;Warning&quot;,
+  &quot;output&quot;: &quot;14:22:09.441027441: Warning A shell was spawned in a container with an attached terminal (evt.type=execve user=root command=bash -i container_id=a1b2c3d4e5f6)&quot;,
+  &quot;output_fields&quot;: {
+    &quot;k8s.ns.name&quot;: &quot;payments&quot;,
+    &quot;k8s.pod.name&quot;: &quot;payments-api-7d9f4c6b5-x2vqm&quot;,
+    &quot;proc.cmdline&quot;: &quot;bash -i&quot;,
+    &quot;container.id&quot;: &quot;a1b2c3d4e5f6&quot;
+  }
+}</pre></td></tr><tr><td class='ref'>RS.MI-01</td><td class='p'>kubectl apply -f quarantine-netpol.yaml &amp;&amp; kubectl get networkpolicy quarantine-payments-api -n payments -o json  (+ kubectl cordon &lt;node&gt;)</td><td class='f'>metadata.name, spec.podSelector.matchLabels, spec.policyTypes, spec.ingress, spec.egress</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;namespace&quot;: &quot;payments&quot;,
+    &quot;name&quot;: &quot;quarantine-payments-api&quot;,
+    &quot;labels&quot;: {
+      &quot;created-by&quot;: &quot;ir-runbook-7&quot;
+    }
+  },
+  &quot;spec&quot;: {
+    &quot;podSelector&quot;: {
+      &quot;matchLabels&quot;: {
+        &quot;quarantine&quot;: &quot;incident-1042&quot;
+      }
+    },
+    &quot;policyTypes&quot;: [
+      &quot;Ingress&quot;,
+      &quot;Egress&quot;
+    ],
+    &quot;ingress&quot;: [],
+    &quot;egress&quot;: []
+  }
+}</pre></td></tr><tr><td class='ref'>RS.MI-02</td><td class='p'>grep &#x27;&quot;verb&quot;:&quot;delete&quot;&#x27; /var/log/kubernetes/audit.log | grep &#x27;&quot;resource&quot;:&quot;pods&quot;&#x27;  (eviction/eradication of compromised workloads)</td><td class='f'>verb, user.username, objectRef.resource, objectRef.name, responseStatus.code, stageTimestamp</td><td><pre class='samp'>{
+  &quot;kind&quot;: &quot;Event&quot;,
+  &quot;apiVersion&quot;: &quot;audit.k8s.io/v1&quot;,
+  &quot;verb&quot;: &quot;delete&quot;,
+  &quot;user&quot;: {
+    &quot;username&quot;: &quot;ir.automation@acme.com&quot;
+  },
+  &quot;objectRef&quot;: {
+    &quot;resource&quot;: &quot;pods&quot;,
+    &quot;namespace&quot;: &quot;payments&quot;,
+    &quot;name&quot;: &quot;payments-api-7d9f4c6b5-x2vqm&quot;
+  },
+  &quot;responseStatus&quot;: {
+    &quot;code&quot;: 200
+  },
+  &quot;stageTimestamp&quot;: &quot;2026-10-06T03:15:02.100000Z&quot;
+}</pre></td></tr><tr><td class='ref'>RC.RP-01</td><td class='p'>kubectl get restores.velero.io -n velero -o json</td><td class='f'>spec.backupName, spec.includedNamespaces, status.phase, status.startTimestamp, status.completionTimestamp, status.warnings</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;namespace&quot;: &quot;velero&quot;,
+    &quot;name&quot;: &quot;restore-payments-20261006&quot;
+  },
+  &quot;spec&quot;: {
+    &quot;backupName&quot;: &quot;schedule-nightly-202610060300&quot;,
+    &quot;includedNamespaces&quot;: [
+      &quot;payments&quot;
+    ],
+    &quot;existingResourcePolicy&quot;: &quot;update&quot;
+  },
+  &quot;status&quot;: {
+    &quot;phase&quot;: &quot;Completed&quot;,
+    &quot;startTimestamp&quot;: &quot;2026-10-06T06:12:04Z&quot;,
+    &quot;completionTimestamp&quot;: &quot;2026-10-06T06:18:47Z&quot;,
+    &quot;warnings&quot;: 0,
+    &quot;errors&quot;: 0
+  }
+}</pre></td></tr><tr><td class='ref'>RC.RP-03</td><td class='p'>kubectl get backups.velero.io,schedules.velero.io -n velero -o json  (+ velero backup describe &lt;name&gt;)</td><td class='f'>spec.storageLocation, spec.ttl, spec.snapshotVolumes, status.phase, status.formatVersion, status.expiration, status.progress.itemsBackedUp</td><td><pre class='samp'>{
+  &quot;metadata&quot;: {
+    &quot;namespace&quot;: &quot;velero&quot;,
+    &quot;name&quot;: &quot;schedule-nightly-202610060300&quot;
+  },
+  &quot;spec&quot;: {
+    &quot;storageLocation&quot;: &quot;default&quot;,
+    &quot;ttl&quot;: &quot;720h0m0s&quot;,
+    &quot;snapshotVolumes&quot;: true,
+    &quot;includedNamespaces&quot;: [
+      &quot;payments&quot;
+    ]
+  },
+  &quot;status&quot;: {
+    &quot;phase&quot;: &quot;Completed&quot;,
+    &quot;formatVersion&quot;: &quot;1.1.0&quot;,
+    &quot;expiration&quot;: &quot;2026-11-05T03:00:00Z&quot;,
+    &quot;errors&quot;: 0,
+    &quot;progress&quot;: {
+      &quot;itemsBackedUp&quot;: 142,
+      &quot;totalItems&quot;: 142
+    }
+  }
+}</pre></td></tr></tbody></table></section><section><h2>Wiz <span class='cnt'>3 endpoints · 13 controls</span></h2><p class='kv'><b>Auth</b> OAuth2 client credentials: POST https://auth&lt;NN&gt;.&lt;region&gt;.wiz.app/oauth/token<br><b>Base URL</b> <span class='mono'>https://api&lt;NN&gt;.&lt;region&gt;.wiz.app</span></p><table><thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr></thead><tbody><tr><td class='m'>POST</td><td class='p'>https://auth&lt;NN&gt;.&lt;region&gt;.wiz.app/oauth/token</td><td>OAuth2 client-credentials token exchange for the Wiz service account; returns the bearer JWT used on all GraphQL requests.</td></tr><tr><td class='m'>POST</td><td class='p'>/graphql</td><td>Primary security-graph query endpoint for CSPM/CWPP/CIEM evidence: issues, cloud resources and inventory, configuration findings, vulnerability findings, controls, and connected cloud accounts.</td></tr><tr><td class='m'>POST</td><td class='p'>/graphql</td><td>Wiz Defend and DSPM operations on the same endpoint (selected via operationName): runtime threat detections and data findings for monitoring, data classification, and incident-scope evidence.</td></tr></tbody></table><h3>Controls this tool evidences</h3><table><thead><tr><th>Ref</th><th>API</th><th>Fields</th><th>Draft response</th></tr></thead><tbody><tr><td class='ref'>ID.AM-02</td><td class='p'>GraphQL cloudResourcesV2(first: 500, filterBy: {cloudPlatform: {equals: [AWS, AZURE, GCP]}})</td><td class='f'>id, name, type, cloudPlatform, region, externalId</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;res-7f31a9&quot;,
+  &quot;name&quot;: &quot;acme-prod-vm-01&quot;,
+  &quot;type&quot;: &quot;VIRTUAL_MACHINE&quot;,
+  &quot;cloudPlatform&quot;: &quot;AWS&quot;,
+  &quot;region&quot;: &quot;us-east-1&quot;,
+  &quot;externalId&quot;: &quot;i-0a1b2c3d4e&quot;
+}</pre></td></tr><tr><td class='ref'>ID.AM-03</td><td class='p'>GraphQL cloudResourcesV2(first: 500, filterBy: {isAccessibleFromInternet: {equals: true}})</td><td class='f'>id, name, type, isAccessibleFromInternet, isOpenToAllInternet, region</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;res-2b90cd&quot;,
+  &quot;name&quot;: &quot;acme-web-alb&quot;,
+  &quot;type&quot;: &quot;LOAD_BALANCER&quot;,
+  &quot;isAccessibleFromInternet&quot;: true,
+  &quot;isOpenToAllInternet&quot;: false,
+  &quot;region&quot;: &quot;us-east-1&quot;
+}</pre></td></tr><tr><td class='ref'>ID.AM-05</td><td class='p'>GraphQL cloudResourcesV2(first: 500, filterBy: {tag: {containsAll: [{key: &quot;criticality&quot;}]}}, orderBy: {field: BUSINESS_CRITICALITY, direction: DESC})</td><td class='f'>id, name, type, criticality, tags, hasSensitiveData</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;res-9c14ef&quot;,
+  &quot;name&quot;: &quot;acme-payments-db&quot;,
+  &quot;type&quot;: &quot;DATABASE&quot;,
+  &quot;criticality&quot;: &quot;CRITICAL&quot;,
+  &quot;tags&quot;: [
+    {
+      &quot;key&quot;: &quot;criticality&quot;,
+      &quot;value&quot;: &quot;critical&quot;
+    }
+  ],
+  &quot;hasSensitiveData&quot;: true
+}</pre></td></tr><tr><td class='ref'>ID.AM-07</td><td class='p'>GraphQL dataFindings(first: 500, filterBy: {sensitiveDataType: [PII, PHI, PCI], confidence: [HIGH]})</td><td class='f'>id, sensitiveDataType, cloudResourceType, cloudResource, region, confidence</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;df-51aa02&quot;,
+  &quot;sensitiveDataType&quot;: &quot;PII&quot;,
+  &quot;cloudResourceType&quot;: &quot;S3_BUCKET&quot;,
+  &quot;cloudResource&quot;: {
+    &quot;id&quot;: &quot;res-aa10bb&quot;,
+    &quot;name&quot;: &quot;acme-customer-data&quot;
+  },
+  &quot;region&quot;: &quot;us-east-1&quot;,
+  &quot;confidence&quot;: &quot;HIGH&quot;
+}</pre></td></tr><tr><td class='ref'>ID.AM-08</td><td class='p'>GraphQL cloudResourcesV2(first: 500, orderBy: {field: CREATED_AT, direction: ASC})</td><td class='f'>id, name, type, createdAt, updatedAt, status</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;res-44de01&quot;,
+  &quot;name&quot;: &quot;acme-legacy-ec2&quot;,
+  &quot;type&quot;: &quot;VIRTUAL_MACHINE&quot;,
+  &quot;createdAt&quot;: &quot;2019-04-02T11:00:00Z&quot;,
+  &quot;updatedAt&quot;: &quot;2026-09-30T08:12:00Z&quot;,
+  &quot;status&quot;: &quot;Active&quot;
+}</pre></td></tr><tr><td class='ref'>PR.DS-02</td><td class='p'>GraphQL issuesV2(first: 500, filterBy: {type: [CLOUD_CONFIGURATION], status: [OPEN]})</td><td class='f'>id, severity, status, entity, type, resolvedAt</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;iss-7c1e90&quot;,
+  &quot;severity&quot;: &quot;HIGH&quot;,
+  &quot;status&quot;: &quot;OPEN&quot;,
+  &quot;entity&quot;: &quot;aws_s3_bucket:acme-public&quot;,
+  &quot;type&quot;: &quot;CLOUD_CONFIGURATION&quot;,
+  &quot;resolvedAt&quot;: null
+}</pre></td></tr><tr><td class='ref'>PR.IR-01</td><td class='p'>GraphQL cloudResourcesV2(first: 500, filterBy: {isOpenToAllInternet: {equals: true}})</td><td class='f'>id, name, type, isOpenToAllInternet, openedPorts, region</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;res-3f7b21&quot;,
+  &quot;name&quot;: &quot;acme-sg-bastion&quot;,
+  &quot;type&quot;: &quot;SECURITY_GROUP&quot;,
+  &quot;isOpenToAllInternet&quot;: true,
+  &quot;openedPorts&quot;: [
+    22,
+    3389
+  ],
+  &quot;region&quot;: &quot;us-east-1&quot;
+}</pre></td></tr><tr><td class='ref'>PR.PS-01</td><td class='p'>GraphQL cloudConfigurationFindings(first: 500, filterBy: {severity: [HIGH, CRITICAL], status: [OPEN]})</td><td class='f'>id, severity, status, rule, resource, cloudPlatform</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;ccf-90ac12&quot;,
+  &quot;severity&quot;: &quot;HIGH&quot;,
+  &quot;status&quot;: &quot;OPEN&quot;,
+  &quot;rule&quot;: {
+    &quot;id&quot;: &quot;rule-11&quot;,
+    &quot;name&quot;: &quot;S3 bucket versioning disabled&quot;
+  },
+  &quot;resource&quot;: {
+    &quot;id&quot;: &quot;res-70aa&quot;,
+    &quot;name&quot;: &quot;acme-logs&quot;
+  },
+  &quot;cloudPlatform&quot;: &quot;AWS&quot;
+}</pre></td></tr><tr><td class='ref'>DE.CM-06</td><td class='p'>GraphQL connectedClouds(first: 500)</td><td class='f'>id, name, externalId, cloudProvider, status, lastScannedAt</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;ca-1234&quot;,
+  &quot;name&quot;: &quot;acme-prod-aws&quot;,
+  &quot;externalId&quot;: &quot;123456789012&quot;,
+  &quot;cloudProvider&quot;: &quot;AWS&quot;,
+  &quot;status&quot;: &quot;CONNECTED&quot;,
+  &quot;lastScannedAt&quot;: &quot;2026-10-06T04:00:00Z&quot;
+}</pre></td></tr><tr><td class='ref'>DE.CM-09</td><td class='p'>GraphQL detections(first: 100, filterBy: {severity: {equals: [CRITICAL, HIGH]}}, orderBy: {field: CREATED_AT, direction: DESC})</td><td class='f'>id, severity, type, status, startedAt, primaryResource</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;det-8b2f11&quot;,
+  &quot;severity&quot;: &quot;HIGH&quot;,
+  &quot;type&quot;: &quot;PRIVILEGE_ESCALATION&quot;,
+  &quot;status&quot;: &quot;OPEN&quot;,
+  &quot;startedAt&quot;: &quot;2026-10-07T01:12:00Z&quot;,
+  &quot;primaryResource&quot;: {
+    &quot;id&quot;: &quot;res-eks-node-3&quot;,
+    &quot;name&quot;: &quot;acme-eks-node&quot;
+  }
+}</pre></td></tr><tr><td class='ref'>ID.RA-01</td><td class='p'>GraphQL vulnerabilityFindings(first: 500, filterBy: {severity: [CRITICAL, HIGH], status: [OPEN]})</td><td class='f'>id, severity, status, vulnerability, resource, cvssScore</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;vuln-5d10aa&quot;,
+  &quot;severity&quot;: &quot;HIGH&quot;,
+  &quot;status&quot;: &quot;OPEN&quot;,
+  &quot;vulnerability&quot;: {
+    &quot;id&quot;: &quot;CVE-2026-1234&quot;,
+    &quot;name&quot;: &quot;OpenSSL RCE&quot;
+  },
+  &quot;resource&quot;: {
+    &quot;id&quot;: &quot;res-vm-02&quot;,
+    &quot;name&quot;: &quot;acme-vm-02&quot;
+  },
+  &quot;cvssScore&quot;: 8.1
+}</pre></td></tr><tr><td class='ref'>ID.RA-05</td><td class='p'>GraphQL issuesV2(first: 500, filterBy: {type: [TOXIC_COMBINATION], severity: [CRITICAL, HIGH]}, orderBy: {field: SEVERITY, direction: DESC})</td><td class='f'>id, severity, status, type, entity, sourceRule</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;iss-2e8c44&quot;,
+  &quot;severity&quot;: &quot;CRITICAL&quot;,
+  &quot;status&quot;: &quot;OPEN&quot;,
+  &quot;type&quot;: &quot;TOXIC_COMBINATION&quot;,
+  &quot;entity&quot;: &quot;aws_s3_bucket:acme-data&quot;,
+  &quot;sourceRule&quot;: {
+    &quot;id&quot;: &quot;rule-77&quot;,
+    &quot;name&quot;: &quot;Public bucket with sensitive data reachable by privileged role&quot;
+  }
+}</pre></td></tr><tr><td class='ref'>RS.AN-08</td><td class='p'>GraphQL detections(first: 100, filterBy: {issueId: [&quot;iss-2e8c44&quot;]})</td><td class='f'>id, severity, status, primaryResource, resources, cloudAccounts</td><td><pre class='samp'>{
+  &quot;id&quot;: &quot;det-4a9d02&quot;,
+  &quot;severity&quot;: &quot;CRITICAL&quot;,
+  &quot;status&quot;: &quot;OPEN&quot;,
+  &quot;primaryResource&quot;: {
+    &quot;id&quot;: &quot;res-aa10bb&quot;
+  },
+  &quot;resources&quot;: [
+    {
+      &quot;id&quot;: &quot;res-web-1&quot;,
+      &quot;name&quot;: &quot;acme-web&quot;
+    },
+    {
+      &quot;id&quot;: &quot;res-db-1&quot;,
+      &quot;name&quot;: &quot;acme-db&quot;
+    }
+  ],
+  &quot;cloudAccounts&quot;: [
+    {
+      &quot;id&quot;: &quot;ca-1234&quot;,
+      &quot;name&quot;: &quot;acme-prod-aws&quot;
+    }
+  ]
+}</pre></td></tr></tbody></table></section><section><h2>AWS <span class='cnt'>17 measured controls</span></h2><p class='kv'>Config checks evaluated by the engine. Sources with collector code are read live by <span class='mono'>src/grc_playbook/collect_aws.py</span> (boto3); the rest run against bundled fixtures in <span class='mono'>examples/evidence/</span>.</p><table><thead><tr><th>Ref</th><th>AWS API</th></tr></thead><tbody><tr><td class='ref'>DE.CM-01</td><td class='p'>Amazon GuardDuty - ListDetectors</td></tr><tr><td class='ref'>DE.CM-03</td><td class='p'>AWS CloudTrail - DescribeTrails</td></tr><tr><td class='ref'>DE.CM-09</td><td class='p'>AWS Security Hub</td></tr><tr><td class='ref'>GV.RR-02</td><td class='p'>AWS IAM - resource tags</td></tr><tr><td class='ref'>ID.AM-02</td><td class='p'>AWS Config - recorder + delivery channel</td></tr><tr><td class='ref'>ID.AM-07</td><td class='p'>Amazon Macie - data discovery</td></tr><tr><td class='ref'>ID.RA-01</td><td class='p'>Amazon Inspector</td></tr><tr><td class='ref'>ID.RA-02</td><td class='p'>Amazon GuardDuty - threat intel</td></tr><tr><td class='ref'>ID.RA-03</td><td class='p'>Amazon GuardDuty</td></tr><tr><td class='ref'>PR.AA-01</td><td class='p'>AWS IAM - iam:ListAccessKeys</td></tr><tr><td class='ref'>PR.AA-03</td><td class='p'>AWS IAM - iam:GetAccountSummary / ListUsers</td></tr><tr><td class='ref'>PR.DS-01</td><td class='p'>Amazon S3 - s3:GetBucketEncryption</td></tr><tr><td class='ref'>PR.DS-11</td><td class='p'>Amazon EBS / RDS - DescribeSnapshots</td></tr><tr><td class='ref'>PR.IR-01</td><td class='p'>Amazon EC2 - ec2:DescribeSecurityGroups</td></tr><tr><td class='ref'>PR.IR-03</td><td class='p'>Amazon RDS - MultiAZ</td></tr><tr><td class='ref'>PR.PS-01</td><td class='p'>Amazon S3 - s3:GetBucketVersioning</td></tr><tr><td class='ref'>PR.PS-04</td><td class='p'>AWS CloudTrail - DescribeTrails</td></tr></tbody></table></section><section><h2>Program &amp; governance sources <span class='cnt'>31 sources</span></h2><p class='kv'>Not config checks; evidenced by a platform record (attested).</p><table><thead><tr><th>Source</th><th>Controls</th></tr></thead><tbody><tr><td>AWS Audit Manager</td><td class='f'>GV.OV-02, ID.IM-01, ID.IM-04</td></tr><tr><td>AWS CloudTrail Lake / Splunk</td><td class='f'>DE.AE-03</td></tr><tr><td>AWS Systems Manager Incident Manager</td><td class='f'>RC.RP-06, RS.CO-02, RS.MA-01</td></tr><tr><td>Amazon CloudWatch</td><td class='f'>RC.RP-04</td></tr><tr><td>Amazon Detective</td><td class='f'>DE.AE-02</td></tr><tr><td>Amazon EventBridge</td><td class='f'>DE.AE-06</td></tr><tr><td>Datadog</td><td class='f'>ID.IM-03</td></tr><tr><td>Diligent</td><td class='f'>GV.RM-02, GV.RR-01</td></tr><tr><td>Jira</td><td class='f'>ID.RA-06, RS.MA-03</td></tr><tr><td>Jira + security intake</td><td class='f'>ID.RA-08</td></tr><tr><td>Mandiant</td><td class='f'>RS.AN-03</td></tr><tr><td>Microsoft Sentinel</td><td class='f'>DE.AE-04</td></tr><tr><td>OneTrust</td><td class='f'>GV.OC-03</td></tr><tr><td>OneTrust Third-Party Risk Management</td><td class='f'>GV.SC-01, GV.SC-04</td></tr><tr><td>PagerDuty</td><td class='f'>DE.AE-08, GV.RM-05, GV.SC-08, RS.MA-04</td></tr><tr><td>Palo Alto Cortex XSOAR</td><td class='f'>RS.CO-03</td></tr><tr><td>Prevalent</td><td class='f'>GV.SC-06</td></tr><tr><td>Recorded Future</td><td class='f'>DE.AE-07</td></tr><tr><td>SecurityScorecard</td><td class='f'>GV.SC-07</td></tr><tr><td>ServiceNow</td><td class='f'>ID.RA-04, ID.RA-07, ID.RA-10, RC.CO-03, RC.CO-04, RS.MA-02, RS.MA-05</td></tr><tr><td>ServiceNow Business Continuity Management</td><td class='f'>GV.OC-04</td></tr><tr><td>ServiceNow CMDB</td><td class='f'>GV.OC-05</td></tr><tr><td>ServiceNow GRC (IRM)</td><td class='f'>GV.OC-01, GV.OC-02</td></tr><tr><td>ServiceNow IRM</td><td class='f'>GV.RM-01, GV.RM-03, GV.RM-04, GV.RM-06, GV.RM-07, GV.SC-03</td></tr><tr><td>ServiceNow Performance Analytics</td><td class='f'>GV.OV-03</td></tr><tr><td>ServiceNow Strategic Portfolio Management</td><td class='f'>GV.RR-03</td></tr><tr><td>ServiceNow Third-Party Risk Management</td><td class='f'>GV.SC-02</td></tr><tr><td>Splunk</td><td class='f'>DE.CM-02, GV.OV-01</td></tr><tr><td>Sumo Logic</td><td class='f'>RS.AN-07</td></tr><tr><td>Vanta</td><td class='f'>GV.PO-01, GV.PO-02</td></tr><tr><td>Workday</td><td class='f'>GV.RR-04</td></tr></tbody></table></section><footer>GRC Engineering Playbook · draft integration specs · docs/integrations/.</footer>
+</div></body></html>

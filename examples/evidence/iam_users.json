@@ -1,0 +1,6 @@
+[
+  { "user_name": "alice", "account": "111111111111", "console_access": true, "mfa_active": true, "access_keys": [ { "key_id": "AKIA...A1", "age_days": 30, "last_used_days_ago": 1 } ], "tags": { "team": "data-platform", "owner": "dana@acme.com" } },
+  { "user_name": "bob", "account": "111111111111", "console_access": true, "mfa_active": false, "access_keys": [ { "key_id": "AKIA...B1", "age_days": 10, "last_used_days_ago": 0 } ], "tags": { "team": "payments", "owner": "pat@acme.com" } },
+  { "user_name": "svc-deployer", "account": "111111111111", "console_access": false, "mfa_active": false, "access_keys": [ { "key_id": "AKIA...S1", "age_days": 412, "last_used_days_ago": 2 } ], "tags": null },
+  { "user_name": "carol", "account": "222222222222", "console_access": true, "mfa_active": true, "access_keys": [], "tags": { "team": "platform", "owner": "fred@acme.com" } }
+]

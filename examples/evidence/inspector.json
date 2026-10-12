@@ -1,0 +1,5 @@
+{
+  "_service": "Amazon Inspector",
+  "enabled": true,
+  "continuous_scan": true
+}

@@ -1,0 +1,4 @@
+[
+  { "name": "rds-prod-orders", "storage_encrypted": true, "publicly_accessible": false, "multi_az": true, "backup_retention_days": 7 },
+  { "name": "rds-reporting", "storage_encrypted": true, "publicly_accessible": false, "multi_az": false, "backup_retention_days": 3 }
+]

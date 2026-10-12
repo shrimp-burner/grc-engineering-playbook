@@ -1,0 +1,10 @@
+[
+  { "time": "2026-10-06T01:58:02Z", "identity": "deploy-bot", "source_ip": "10.0.4.12", "event": "PutObject", "resource": "s3://acme-prod-data/app/build.tgz", "outcome": "Allow" },
+  { "time": "2026-10-06T02:10:44Z", "identity": "alice@acme.com", "source_ip": "203.0.113.7", "event": "GetObject", "resource": "s3://acme-prod-data/report.csv", "outcome": "Allow" },
+  { "time": "2026-10-06T02:14:01Z", "identity": "svc-ci", "source_ip": "198.51.100.44", "event": "StopLogging", "resource": "arn:aws:cloudtrail:us-east-1:111111111111:trail/acme-org-trail", "outcome": "Allow" },
+  { "time": "2026-10-06T02:14:33Z", "identity": "svc-ci", "source_ip": "198.51.100.44", "event": "CreateAccessKey", "resource": "iam::user/svc-ci", "outcome": "Allow" },
+  { "time": "2026-10-06T02:15:02Z", "identity": "svc-ci", "source_ip": "198.51.100.44", "event": "RunInstances", "resource": "ec2:us-east-1:i-crypto999", "outcome": "Allow" },
+  { "time": "2026-10-06T02:16:10Z", "identity": "svc-ci", "source_ip": "198.51.100.44", "event": "PutBucketPolicy", "resource": "s3://acme-cloudtrail-logs", "outcome": "Allow" },
+  { "time": "2026-10-06T02:40:00Z", "identity": "ops@acme.com", "source_ip": "10.0.1.5", "event": "UpdateTrail", "resource": "arn:aws:cloudtrail:us-east-1:111111111111:trail/acme-dev-trail", "outcome": "Allow" },
+  { "time": "2026-10-06T03:05:00Z", "identity": "root", "source_ip": "198.51.100.99", "event": "DeleteTrail", "resource": "arn:aws:cloudtrail:us-east-1:111111111111:trail/acme-dev-trail", "outcome": "Deny" }
+]

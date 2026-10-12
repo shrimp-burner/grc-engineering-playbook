@@ -1,0 +1,7 @@
+{
+  "team-data": { "email": "data@acme.com", "manager": "dana" },
+  "team-platform": { "email": "platform@acme.com", "manager": "fred" },
+  "team-payments": { "email": "payments@acme.com", "manager": "pat" },
+  "cloud-security": { "email": "sec@acme.com", "manager": "sam" },
+  "identity": { "email": "identity@acme.com", "manager": "ivy" }
+}

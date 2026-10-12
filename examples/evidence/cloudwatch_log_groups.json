@@ -1,0 +1,4 @@
+[
+  { "name": "/aws/lambda/reports", "retention_days": 365 },
+  { "name": "/aws/app/legacy", "retention_days": null }
+]

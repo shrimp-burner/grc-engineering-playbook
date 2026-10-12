@@ -1,0 +1,8 @@
+{
+  "_note": "Strong SCP: deny leaving the organization boundary.",
+  "Version": "2012-10-17",
+  "Statement": [
+    { "Sid": "DenyLeavingOrg", "Effect": "Deny", "Action": "sts:AssumeRole", "Resource": "*",
+      "Condition": { "StringNotEquals": { "aws:PrincipalOrgID": "o-abc1234567" } } }
+  ]
+}

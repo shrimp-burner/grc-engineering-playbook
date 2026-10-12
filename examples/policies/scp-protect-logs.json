@@ -1,0 +1,8 @@
+{
+  "_note": "Strong SCP: protects the audit trail. Attach at the org root.",
+  "Version": "2012-10-17",
+  "Statement": [
+    { "Sid": "ProtectCloudTrail", "Effect": "Deny", "Action": ["cloudtrail:StopLogging", "cloudtrail:DeleteTrail", "cloudtrail:UpdateTrail"], "Resource": "*" },
+    { "Sid": "ProtectLogGroups", "Effect": "Deny", "Action": ["logs:DeleteLogGroup", "logs:DeleteLogStream"], "Resource": "*" }
+  ]
+}

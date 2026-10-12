@@ -1,0 +1,12 @@
+{
+  "_comment": "Is the security-logging protection actually in place? Gaps here are posture findings.",
+  "org_trail": true,
+  "multi_region": true,
+  "log_file_validation": false,
+  "centralized_log_account": true,
+  "kms_encrypted": true,
+  "object_lock_enabled": false,
+  "versioning": true,
+  "scp_protect_logs_attached": true,
+  "root_mfa_enabled": true
+}

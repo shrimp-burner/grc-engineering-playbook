@@ -1,0 +1,329 @@
+{
+  "tool": "Wiz",
+  "auth": "OAuth2 client credentials: POST https://auth<NN>.<region>.wiz.app/oauth/token",
+  "base_url": "https://api<NN>.<region>.wiz.app",
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "https://auth<NN>.<region>.wiz.app/oauth/token",
+      "purpose": "OAuth2 client-credentials token exchange for the Wiz service account; returns the bearer JWT used on all GraphQL requests."
+    },
+    {
+      "method": "POST",
+      "path": "/graphql",
+      "purpose": "Primary security-graph query endpoint for CSPM/CWPP/CIEM evidence: issues, cloud resources and inventory, configuration findings, vulnerability findings, controls, and connected cloud accounts."
+    },
+    {
+      "method": "POST",
+      "path": "/graphql",
+      "purpose": "Wiz Defend and DSPM operations on the same endpoint (selected via operationName): runtime threat detections and data findings for monitoring, data classification, and incident-scope evidence."
+    }
+  ],
+  "controls": [
+    {
+      "ref": "ID.AM-02",
+      "api": "GraphQL cloudResourcesV2(first: 500, filterBy: {cloudPlatform: {equals: [AWS, AZURE, GCP]}})",
+      "fields": [
+        "id",
+        "name",
+        "type",
+        "cloudPlatform",
+        "region",
+        "externalId"
+      ],
+      "sample": {
+        "id": "res-7f31a9",
+        "name": "acme-prod-vm-01",
+        "type": "VIRTUAL_MACHINE",
+        "cloudPlatform": "AWS",
+        "region": "us-east-1",
+        "externalId": "i-0a1b2c3d4e"
+      }
+    },
+    {
+      "ref": "ID.AM-03",
+      "api": "GraphQL cloudResourcesV2(first: 500, filterBy: {isAccessibleFromInternet: {equals: true}})",
+      "fields": [
+        "id",
+        "name",
+        "type",
+        "isAccessibleFromInternet",
+        "isOpenToAllInternet",
+        "region"
+      ],
+      "sample": {
+        "id": "res-2b90cd",
+        "name": "acme-web-alb",
+        "type": "LOAD_BALANCER",
+        "isAccessibleFromInternet": true,
+        "isOpenToAllInternet": false,
+        "region": "us-east-1"
+      }
+    },
+    {
+      "ref": "ID.AM-05",
+      "api": "GraphQL cloudResourcesV2(first: 500, filterBy: {tag: {containsAll: [{key: \"criticality\"}]}}, orderBy: {field: BUSINESS_CRITICALITY, direction: DESC})",
+      "fields": [
+        "id",
+        "name",
+        "type",
+        "criticality",
+        "tags",
+        "hasSensitiveData"
+      ],
+      "sample": {
+        "id": "res-9c14ef",
+        "name": "acme-payments-db",
+        "type": "DATABASE",
+        "criticality": "CRITICAL",
+        "tags": [
+          {
+            "key": "criticality",
+            "value": "critical"
+          }
+        ],
+        "hasSensitiveData": true
+      }
+    },
+    {
+      "ref": "ID.AM-07",
+      "api": "GraphQL dataFindings(first: 500, filterBy: {sensitiveDataType: [PII, PHI, PCI], confidence: [HIGH]})",
+      "fields": [
+        "id",
+        "sensitiveDataType",
+        "cloudResourceType",
+        "cloudResource",
+        "region",
+        "confidence"
+      ],
+      "sample": {
+        "id": "df-51aa02",
+        "sensitiveDataType": "PII",
+        "cloudResourceType": "S3_BUCKET",
+        "cloudResource": {
+          "id": "res-aa10bb",
+          "name": "acme-customer-data"
+        },
+        "region": "us-east-1",
+        "confidence": "HIGH"
+      }
+    },
+    {
+      "ref": "ID.AM-08",
+      "api": "GraphQL cloudResourcesV2(first: 500, orderBy: {field: CREATED_AT, direction: ASC})",
+      "fields": [
+        "id",
+        "name",
+        "type",
+        "createdAt",
+        "updatedAt",
+        "status"
+      ],
+      "sample": {
+        "id": "res-44de01",
+        "name": "acme-legacy-ec2",
+        "type": "VIRTUAL_MACHINE",
+        "createdAt": "2019-04-02T11:00:00Z",
+        "updatedAt": "2026-09-30T08:12:00Z",
+        "status": "Active"
+      }
+    },
+    {
+      "ref": "PR.DS-02",
+      "api": "GraphQL issuesV2(first: 500, filterBy: {type: [CLOUD_CONFIGURATION], status: [OPEN]})",
+      "fields": [
+        "id",
+        "severity",
+        "status",
+        "entity",
+        "type",
+        "resolvedAt"
+      ],
+      "sample": {
+        "id": "iss-7c1e90",
+        "severity": "HIGH",
+        "status": "OPEN",
+        "entity": "aws_s3_bucket:acme-public",
+        "type": "CLOUD_CONFIGURATION",
+        "resolvedAt": null
+      }
+    },
+    {
+      "ref": "PR.IR-01",
+      "api": "GraphQL cloudResourcesV2(first: 500, filterBy: {isOpenToAllInternet: {equals: true}})",
+      "fields": [
+        "id",
+        "name",
+        "type",
+        "isOpenToAllInternet",
+        "openedPorts",
+        "region"
+      ],
+      "sample": {
+        "id": "res-3f7b21",
+        "name": "acme-sg-bastion",
+        "type": "SECURITY_GROUP",
+        "isOpenToAllInternet": true,
+        "openedPorts": [
+          22,
+          3389
+        ],
+        "region": "us-east-1"
+      }
+    },
+    {
+      "ref": "PR.PS-01",
+      "api": "GraphQL cloudConfigurationFindings(first: 500, filterBy: {severity: [HIGH, CRITICAL], status: [OPEN]})",
+      "fields": [
+        "id",
+        "severity",
+        "status",
+        "rule",
+        "resource",
+        "cloudPlatform"
+      ],
+      "sample": {
+        "id": "ccf-90ac12",
+        "severity": "HIGH",
+        "status": "OPEN",
+        "rule": {
+          "id": "rule-11",
+          "name": "S3 bucket versioning disabled"
+        },
+        "resource": {
+          "id": "res-70aa",
+          "name": "acme-logs"
+        },
+        "cloudPlatform": "AWS"
+      }
+    },
+    {
+      "ref": "DE.CM-06",
+      "api": "GraphQL connectedClouds(first: 500)",
+      "fields": [
+        "id",
+        "name",
+        "externalId",
+        "cloudProvider",
+        "status",
+        "lastScannedAt"
+      ],
+      "sample": {
+        "id": "ca-1234",
+        "name": "acme-prod-aws",
+        "externalId": "123456789012",
+        "cloudProvider": "AWS",
+        "status": "CONNECTED",
+        "lastScannedAt": "2026-10-06T04:00:00Z"
+      }
+    },
+    {
+      "ref": "DE.CM-09",
+      "api": "GraphQL detections(first: 100, filterBy: {severity: {equals: [CRITICAL, HIGH]}}, orderBy: {field: CREATED_AT, direction: DESC})",
+      "fields": [
+        "id",
+        "severity",
+        "type",
+        "status",
+        "startedAt",
+        "primaryResource"
+      ],
+      "sample": {
+        "id": "det-8b2f11",
+        "severity": "HIGH",
+        "type": "PRIVILEGE_ESCALATION",
+        "status": "OPEN",
+        "startedAt": "2026-10-07T01:12:00Z",
+        "primaryResource": {
+          "id": "res-eks-node-3",
+          "name": "acme-eks-node"
+        }
+      }
+    },
+    {
+      "ref": "ID.RA-01",
+      "api": "GraphQL vulnerabilityFindings(first: 500, filterBy: {severity: [CRITICAL, HIGH], status: [OPEN]})",
+      "fields": [
+        "id",
+        "severity",
+        "status",
+        "vulnerability",
+        "resource",
+        "cvssScore"
+      ],
+      "sample": {
+        "id": "vuln-5d10aa",
+        "severity": "HIGH",
+        "status": "OPEN",
+        "vulnerability": {
+          "id": "CVE-2026-1234",
+          "name": "OpenSSL RCE"
+        },
+        "resource": {
+          "id": "res-vm-02",
+          "name": "acme-vm-02"
+        },
+        "cvssScore": 8.1
+      }
+    },
+    {
+      "ref": "ID.RA-05",
+      "api": "GraphQL issuesV2(first: 500, filterBy: {type: [TOXIC_COMBINATION], severity: [CRITICAL, HIGH]}, orderBy: {field: SEVERITY, direction: DESC})",
+      "fields": [
+        "id",
+        "severity",
+        "status",
+        "type",
+        "entity",
+        "sourceRule"
+      ],
+      "sample": {
+        "id": "iss-2e8c44",
+        "severity": "CRITICAL",
+        "status": "OPEN",
+        "type": "TOXIC_COMBINATION",
+        "entity": "aws_s3_bucket:acme-data",
+        "sourceRule": {
+          "id": "rule-77",
+          "name": "Public bucket with sensitive data reachable by privileged role"
+        }
+      }
+    },
+    {
+      "ref": "RS.AN-08",
+      "api": "GraphQL detections(first: 100, filterBy: {issueId: [\"iss-2e8c44\"]})",
+      "fields": [
+        "id",
+        "severity",
+        "status",
+        "primaryResource",
+        "resources",
+        "cloudAccounts"
+      ],
+      "sample": {
+        "id": "det-4a9d02",
+        "severity": "CRITICAL",
+        "status": "OPEN",
+        "primaryResource": {
+          "id": "res-aa10bb"
+        },
+        "resources": [
+          {
+            "id": "res-web-1",
+            "name": "acme-web"
+          },
+          {
+            "id": "res-db-1",
+            "name": "acme-db"
+          }
+        ],
+        "cloudAccounts": [
+          {
+            "id": "ca-1234",
+            "name": "acme-prod-aws"
+          }
+        ]
+      }
+    }
+  ]
+}

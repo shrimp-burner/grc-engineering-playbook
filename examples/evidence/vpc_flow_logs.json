@@ -1,0 +1,4 @@
+[
+  { "vpc": "vpc-prod", "flow_logs_enabled": true },
+  { "vpc": "vpc-dev", "flow_logs_enabled": false }
+]

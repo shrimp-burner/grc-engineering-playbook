@@ -1,0 +1,7 @@
+{
+  "_note": "WEAK SCP: only denies key deletion. Missing org-boundary and log protection.",
+  "Version": "2012-10-17",
+  "Statement": [
+    { "Sid": "DenyKmsDelete", "Effect": "Deny", "Action": ["kms:ScheduleKeyDeletion", "kms:DisableKey"], "Resource": "*" }
+  ]
+}

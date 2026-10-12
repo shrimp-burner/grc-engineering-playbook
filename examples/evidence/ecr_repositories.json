@@ -1,0 +1,4 @@
+[
+  { "name": "app", "scan_on_push": true, "immutable_tags": true },
+  { "name": "legacy", "scan_on_push": false, "immutable_tags": false }
+]

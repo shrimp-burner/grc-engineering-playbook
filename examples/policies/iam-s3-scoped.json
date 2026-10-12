@@ -1,0 +1,8 @@
+{
+  "_note": "Good IAM policy: scoped to specific actions and a specific bucket prefix.",
+  "Version": "2012-10-17",
+  "Statement": [
+    { "Sid": "ReadAppBucket", "Effect": "Allow", "Action": ["s3:GetObject", "s3:ListBucket"],
+      "Resource": ["arn:aws:s3:::acme-prod-data", "arn:aws:s3:::acme-prod-data/app/*"] }
+  ]
+}

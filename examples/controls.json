@@ -1,0 +1,425 @@
+{
+  "_meta": {
+    "operators": [
+      "eq",
+      "neq",
+      "lt",
+      "lte",
+      "gt",
+      "gte",
+      "not_null",
+      "in",
+      "contains",
+      "max_field_lt"
+    ]
+  },
+  "controls": [
+    {
+      "id": "GR-S3-001",
+      "title": "S3 buckets must have server-side encryption",
+      "framework": "SOC2",
+      "ref": "CC6.1",
+      "owner": "cloud-security",
+      "severity": "critical",
+      "resource": "s3_buckets",
+      "filters": [],
+      "conditions": [
+        {
+          "path": "encryption.enabled",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "mappings": [
+        {
+          "framework": "SOC2",
+          "ref": "CC6.1"
+        },
+        {
+          "framework": "ISO27001",
+          "ref": "A.8.24"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "PR.DS-01"
+        }
+      ]
+    },
+    {
+      "id": "GR-S3-002",
+      "title": "S3 buckets must not be publicly accessible via ACL",
+      "framework": "SOC2",
+      "ref": "CC6.1",
+      "owner": "cloud-security",
+      "severity": "critical",
+      "resource": "s3_buckets",
+      "filters": [],
+      "conditions": [
+        {
+          "path": "public_access.acl_public",
+          "op": "eq",
+          "value": false
+        }
+      ],
+      "mappings": [
+        {
+          "framework": "SOC2",
+          "ref": "CC6.1"
+        },
+        {
+          "framework": "ISO27001",
+          "ref": "A.5.15"
+        }
+      ]
+    },
+    {
+      "id": "GR-S3-003",
+      "title": "S3 buckets must have access logging configured",
+      "framework": "ISO27001",
+      "ref": "A.8.15",
+      "owner": "cloud-security",
+      "severity": "high",
+      "resource": "s3_buckets",
+      "filters": [],
+      "conditions": [
+        {
+          "path": "logging_target",
+          "op": "not_null"
+        }
+      ],
+      "mappings": [
+        {
+          "framework": "ISO27001",
+          "ref": "A.8.15"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "PR.PS-04"
+        }
+      ]
+    },
+    {
+      "id": "GR-S3-004",
+      "title": "S3 buckets must have versioning enabled",
+      "framework": "ISO27001",
+      "ref": "A.8.13",
+      "owner": "platform",
+      "severity": "medium",
+      "resource": "s3_buckets",
+      "filters": [],
+      "conditions": [
+        {
+          "path": "versioning",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "mappings": [
+        {
+          "framework": "ISO27001",
+          "ref": "A.8.13"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "PR.PS-01"
+        }
+      ]
+    },
+    {
+      "id": "GR-S3-005",
+      "title": "S3 buckets must enable block_public_acls",
+      "framework": "ISO27001",
+      "ref": "A.8.15",
+      "owner": "cloud-security",
+      "severity": "high",
+      "resource": "s3_buckets",
+      "filters": [],
+      "conditions": [
+        {
+          "path": "public_access.block_public_acls",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "mappings": [
+        {
+          "framework": "ISO27001",
+          "ref": "A.5.15"
+        }
+      ]
+    },
+    {
+      "id": "GR-IAM-001",
+      "title": "Users with console access must have MFA active",
+      "framework": "SOC2",
+      "ref": "CC6.1",
+      "owner": "identity",
+      "severity": "critical",
+      "resource": "iam_users",
+      "filters": [
+        {
+          "path": "console_access",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "conditions": [
+        {
+          "path": "mfa_active",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "mappings": [
+        {
+          "framework": "SOC2",
+          "ref": "CC6.1"
+        },
+        {
+          "framework": "ISO27001",
+          "ref": "A.8.5"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "PR.AA-03"
+        }
+      ]
+    },
+    {
+      "id": "GR-IAM-002",
+      "title": "No access key older than 90 days",
+      "framework": "SOC2",
+      "ref": "CC6.1",
+      "owner": "identity",
+      "severity": "high",
+      "resource": "iam_users",
+      "filters": [],
+      "conditions": [
+        {
+          "op": "max_field_lt",
+          "path": "access_keys",
+          "field": "age_days",
+          "value": 90
+        }
+      ],
+      "mappings": [
+        {
+          "framework": "SOC2",
+          "ref": "CC6.1"
+        },
+        {
+          "framework": "ISO27001",
+          "ref": "A.8.5"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "PR.AA-01"
+        }
+      ]
+    },
+    {
+      "id": "GR-GD-001",
+      "title": "GuardDuty detector enabled in every account",
+      "framework": "SOC2",
+      "ref": "CC7.2",
+      "owner": "cloud-security",
+      "severity": "high",
+      "resource": "guardduty",
+      "filters": [],
+      "conditions": [
+        {
+          "path": "detector_enabled",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "expected_count_min": 1,
+      "mappings": [
+        {
+          "framework": "SOC2",
+          "ref": "CC7.2"
+        },
+        {
+          "framework": "ISO27001",
+          "ref": "A.8.16"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "DE.CM-01"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "ID.RA-02"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "ID.RA-03"
+        }
+      ]
+    },
+    {
+      "id": "GR-CT-001",
+      "title": "CloudTrail logging enabled and multi-region",
+      "framework": "SOC2",
+      "ref": "CC7.2",
+      "owner": "cloud-security",
+      "severity": "critical",
+      "resource": "cloudtrail_trails",
+      "filters": [],
+      "conditions": [
+        {
+          "path": "is_logging",
+          "op": "eq",
+          "value": true
+        },
+        {
+          "path": "multi_region",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "mappings": [
+        {
+          "framework": "SOC2",
+          "ref": "CC7.2"
+        },
+        {
+          "framework": "ISO27001",
+          "ref": "A.8.16"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "DE.CM-03"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "PR.PS-04"
+        }
+      ]
+    },
+    {
+      "id": "GR-CT-002",
+      "title": "CloudTrail log file validation enabled",
+      "framework": "SOC2",
+      "ref": "CC7.2",
+      "owner": "cloud-security",
+      "severity": "high",
+      "resource": "cloudtrail_trails",
+      "filters": [],
+      "conditions": [
+        {
+          "path": "log_validation",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "mappings": [
+        {
+          "framework": "SOC2",
+          "ref": "CC7.2"
+        }
+      ]
+    },
+    {
+      "id": "GR-BK-001",
+      "title": "Critical resources snapshotted within last 7 days",
+      "framework": "ISO27001",
+      "ref": "A.8.13",
+      "owner": "platform",
+      "severity": "medium",
+      "resource": "backups",
+      "filters": [],
+      "conditions": [
+        {
+          "path": "last_snapshot_days",
+          "op": "lte",
+          "value": 7
+        }
+      ],
+      "mappings": [
+        {
+          "framework": "ISO27001",
+          "ref": "A.8.13"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "PR.DS-11"
+        }
+      ]
+    },
+    {
+      "id": "GR-BK-002",
+      "title": "Every snapshot policy must be defined",
+      "framework": "ISO27001",
+      "ref": "A.8.13",
+      "owner": "platform",
+      "severity": "low",
+      "resource": "backups",
+      "filters": [],
+      "conditions": [
+        {
+          "path": "policy",
+          "op": "not_null"
+        }
+      ],
+      "mappings": [
+        {
+          "framework": "ISO27001",
+          "ref": "A.8.13"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "RC.RP-01"
+        }
+      ]
+    },
+    {
+      "id": "GR-SES-001",
+      "title": "SES suppression list reviewed monthly",
+      "framework": "SOC2",
+      "ref": "CC7.2",
+      "owner": "grc",
+      "severity": "low",
+      "resource": "ses_suppression_list",
+      "filters": [],
+      "conditions": [
+        {
+          "path": "last_review_days",
+          "op": "lte",
+          "value": 30
+        }
+      ]
+    },
+    {
+      "id": "GR-IAM-003",
+      "title": "IAM users must carry Team and Owner tags",
+      "framework": "SOC2",
+      "ref": "CC6.1",
+      "owner": "grc",
+      "severity": "medium",
+      "resource": "iam_users",
+      "logic": "all",
+      "filters": [],
+      "conditions": [
+        {
+          "path": "tags.team",
+          "op": "not_null"
+        },
+        {
+          "path": "tags.owner",
+          "op": "not_null"
+        }
+      ],
+      "mappings": [
+        {
+          "framework": "SOC2",
+          "ref": "CC6.1"
+        },
+        {
+          "framework": "NIST-CSF-2.0",
+          "ref": "GV.RR-02"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+[
+  { "name": "events", "encrypted": true },
+  { "name": "legacy", "encrypted": false }
+]

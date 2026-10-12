@@ -1,0 +1,16 @@
+[
+  { "id": "A-01", "name": "acme-prod-data", "type": "s3_bucket", "account": "111111111111", "owner_team": "team-data", "created_by": "dana@acme.com" },
+  { "id": "A-02", "name": "acme-prod-backup", "type": "s3_bucket", "account": "111111111111", "owner_team": "team-data", "created_by": "dana@acme.com" },
+  { "id": "A-03", "name": "acme-shared-artifacts", "type": "s3_bucket", "account": "222222222222", "owner_team": "team-platform", "created_by": "fred@acme.com" },
+  { "id": "A-04", "name": "acme-dev-scratch", "type": "s3_bucket", "account": "333333333333", "owner_team": null, "created_by": "intern@acme.com" },
+  { "id": "A-05", "name": "sg-app-01", "type": "security_group", "account": "111111111111", "owner_team": "team-payments", "created_by": "pat@acme.com" },
+  { "id": "A-06", "name": "i-orders-01", "type": "ec2_instance", "account": "111111111111", "owner_team": "team-payments", "created_by": "pat@acme.com" },
+  { "id": "A-07", "name": "rds-prod-orders", "type": "rds_db", "account": "111111111111", "owner_team": "team-payments", "created_by": "pat@acme.com" },
+  { "id": "A-08", "name": "ebs-vol-app-01", "type": "ebs_volume", "account": "111111111111", "owner_team": null, "created_by": "pat@acme.com" },
+  { "id": "A-09", "name": "iam-role-deployer", "type": "iam_role", "account": "111111111111", "owner_team": "team-platform", "created_by": "fred@acme.com" },
+  { "id": "A-10", "name": "acme-dev-runner", "type": "ec2_instance", "account": "333333333333", "owner_team": null, "created_by": "intern@acme.com" },
+  { "id": "A-11", "name": "dynamodb-sessions", "type": "dynamodb_table", "account": "111111111111", "owner_team": "team-data", "created_by": "dana@acme.com" },
+  { "id": "A-12", "name": "acme-shared-logs", "type": "s3_bucket", "account": "222222222222", "owner_team": "cloud-security", "created_by": "sam@acme.com" },
+  { "id": "A-13", "name": "lambda-reports", "type": "lambda_function", "account": "222222222222", "owner_team": null, "created_by": "fred@acme.com" },
+  { "id": "A-14", "name": "sqs-events", "type": "sqs_queue", "account": "111111111111", "owner_team": null, "created_by": "unknown@external" }
+]

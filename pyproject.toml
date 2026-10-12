@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "grc-playbook"
+version = "0.1.0"
+description = "Reference implementations for continuous compliance automation on AWS (controls-as-code, drift, evidence, policy-as-code)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+keywords = ["grc", "compliance", "aws", "security", "iac", "controls-as-code"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Security",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.urls]
+Repository = "https://github.com/shrimp-burner/grc-engineering-playbook"
+
+[project.scripts]
+grc-playbook = "grc_playbook.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

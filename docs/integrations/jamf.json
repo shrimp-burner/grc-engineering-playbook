@@ -1,0 +1,107 @@
+{
+  "tool": "Jamf Pro",
+  "auth": "OAuth2 client-credentials grant for a Jamf Pro API Client: POST {base_url}/v1/oauth/token with form-encoded client_id/client_secret (grant_type=client_credentials) returns a bearer access_token (short-lived, ~30 min default TTL; re-request when expired). Alternative: POST {base_url}/v1/auth/token with HTTP Basic credentials of a Jamf Pro API-role account; refresh via POST /v1/auth/refresh-token and revoke via POST /v1/auth/invalidate-token. The same bearer token is honored by classic /JSSResource endpoints (which live at the instance root, outside /api). Provision a least-privilege API role with only Read privileges for the endpoints below (Read Computers, Read Mobile Devices, Read Smart Computer Groups, Read Static Computer Groups, Read Policies, Read User-Initiated Enrollment, View Local Admin Password Audit History, Read Device Compliance Information); write commands (POST /v2/mdm/commands) are approval-gated per playbook decision D7 and are never issued autonomously.",
+  "base_url": "https://<instance>.jamfcloud.com/api",
+  "endpoints": [
+    { "method": "POST", "path": "/v1/oauth/token", "purpose": "OAuth2 client-credentials exchange: client_id + client_secret -> bearer access_token for an API Client (least-privilege, secret-rotatable)." },
+    { "method": "POST", "path": "/v1/auth/token", "purpose": "Basic-auth token exchange: HTTP Basic (API-role username/password) -> bearer JWT; supported alternative for tenants not using API Clients (Jamf recommends API Clients as more secure and has not deprecated this path)." },
+    { "method": "POST", "path": "/v1/auth/refresh-token", "purpose": "Refresh an unexpired bearer token issued via /v1/auth/token." },
+    { "method": "POST", "path": "/v1/auth/invalidate-token", "purpose": "Revoke the current bearer token on integration teardown/rotation." },
+    { "method": "GET", "path": "/v1/computers-inventory", "purpose": "Paginated macOS computer inventory (totalCount/results envelope; page, page-size, sort, RSQL filter params). section=GENERAL,HARDWARE,APPLICATIONS,SECURITY,PURCHASING,... trims the payload to the sections a control needs." },
+    { "method": "GET", "path": "/v1/computers-inventory/{id}", "purpose": "Single computer inventory record for drill-down on one device." },
+    { "method": "GET", "path": "/v1/computers-inventory-detail/{id}", "purpose": "Full detail record: applications, localUserAccounts, certificates, configurationProfiles and groupMemberships (groupId/groupName/smartGroup) for one computer." },
+    { "method": "GET", "path": "/v2/mobile-devices", "purpose": "Paginated iOS/iPadOS/tvOS device inventory with RSQL filter; the v1 equivalent is deprecated, use v2." },
+    { "method": "GET", "path": "/v2/mobile-devices/{id}/detail", "purpose": "Full mobile device detail incl. security block (activationLockEnabled, passcodeCompliant, hardwareEncryption, jailBreakDetected) and managementId used for MDM commands." },
+    { "method": "GET", "path": "/v2/patch-software-title-configurations", "purpose": "List of configured patch titles (third-party + Apple) that Jamf tracks for version currency; classic /JSSResource/patchsoftwaretitles is deprecated in its favor." },
+    { "method": "GET", "path": "/v2/patch-software-title-configurations/{id}/patch-summary/versions", "purpose": "Per-version install counts for one patch title - quantifies how many devices still run old, unpatched software versions." },
+    { "method": "GET", "path": "/v2/patch-policies", "purpose": "Patch policies that enforce version/deadline-driven installs; pair with GET /v2/patch-policies/{id}/logs for per-device outcomes." },
+    { "method": "GET", "path": "/v1/managed-software-updates/update-statuses/computers/{id}", "purpose": "macOS managed software-update state (download/install/available) for one computer, evidencing OS-update delivery." },
+    { "method": "GET", "path": "/v2/local-admin-password/settings", "purpose": "Jamf Managed Local Admin Passwords (LAPS) settings: auto-deploy and auto-rotation of the local admin password. Companion reads: /v2/local-admin-password/{clientManagementId}/accounts and /account/{username}/audit." },
+    { "method": "GET", "path": "/v2/local-admin-password/{clientManagementId}/account/{username}/audit", "purpose": "Audit trail of who viewed/rotated a managed local admin password - access-to-device-credentials is attributable." },
+    { "method": "POST", "path": "/v2/mdm/commands", "purpose": "Queue an MDM command (DEVICE_LOCK, ERASE_DEVICE, ENABLE_LOST_MODE, SET_RECOVERY_LOCK, RESTART_DEVICE...) against clientData[].managementId, e.g. erase with return-to-service for device recovery. WRITE action: execute only behind human approval (D7); evidence read is the command history/audit." },
+    { "method": "GET", "path": "/v1/conditional-access/device-compliance-information/computer/{deviceId}", "purpose": "Per-computer device-compliance state surfaced to conditional access (privilege: Read Device Compliance Information) - devices must report healthy state to keep access." },
+    { "method": "GET", "path": "/JSSResource/computergroups/id/{id}", "purpose": "Classic API (instance root, no /api prefix): smart computer group definition incl. criteria (name/search_type/value) - scoping used to detect unauthorized software and gate remediation." },
+    { "method": "GET", "path": "/JSSResource/policies/id/{id}", "purpose": "Classic API: policy detail incl. general.enabled and self_service payloads - policies deliver Self Service content such as security-awareness training." },
+    { "method": "GET", "path": "/JSSResource/usergroups/id/{id}", "purpose": "Classic API: smart user group definition (is_smart, criteria, users) - role-based scoping used to target specialized training and privileged device access." }
+  ],
+  "controls": [
+    {
+      "ref": "ID.AM-01",
+      "api": "GET /v1/computers-inventory",
+      "fields": ["id", "udid", "general.name", "hardware.model", "hardware.serialNumber"],
+      "sample": { "totalCount": 2, "results": [ { "id": 1, "udid": "B1F0A55E-9C4E-4B7E-8A21-6C02D4A9E701", "general": { "name": "MBP-014" }, "hardware": { "model": "MacBook Pro 14-inch 2023", "serialNumber": "C02VN0XJHTD6" } } ] }
+    },
+    {
+      "ref": "ID.AM-02",
+      "api": "GET /v1/computers-inventory?section=APPLICATIONS",
+      "fields": ["general.name", "applications[].name", "applications[].version", "applications[].path"],
+      "sample": { "general": { "name": "MBP-014" }, "applications": [ { "name": "Google Chrome", "version": "131.0.6778.86", "path": "/Applications/Google Chrome.app" } ] }
+    },
+    {
+      "ref": "PR.PS-02",
+      "api": "GET /v2/patch-software-title-configurations/{id}/patch-summary/versions",
+      "fields": ["version", "onVersion"],
+      "sample": { "version": "6.4.1.51234", "onVersion": 94 }
+    },
+    {
+      "ref": "PR.PS-03",
+      "api": "GET /v1/computers-inventory?section=HARDWARE,PURCHASING",
+      "fields": ["general.name", "hardware.model", "hardware.serialNumber", "purchasing.warrantyDate", "purchasing.lifeExpectancy"],
+      "sample": { "general": { "name": "MBP-014" }, "hardware": { "model": "MacBook Pro 14-inch 2023", "serialNumber": "C02VN0XJHTD6" }, "purchasing": { "warrantyDate": "2027-08-01", "lifeExpectancy": 5 } }
+    },
+    {
+      "ref": "PR.DS-10",
+      "api": "GET /v1/computers-inventory?section=SECURITY",
+      "fields": ["general.name", "operatingSystem.fileVault2Status", "diskEncryption.fileVault2Enabled", "diskEncryption.fileVault2EnabledUserNames", "security.recoveryLockEnabled"],
+      "sample": { "general": { "name": "MBP-014" }, "operatingSystem": { "fileVault2Status": "ALL_ENCRYPTED" }, "diskEncryption": { "fileVault2Enabled": true, "fileVault2EnabledUserNames": ["j.reid"] }, "security": { "recoveryLockEnabled": true } }
+    },
+    {
+      "ref": "PR.AA-06",
+      "api": "GET /v2/local-admin-password/settings",
+      "fields": ["autoDeployEnabled", "autoRotateEnabled", "passwordRotationTime", "autoRotateExpirationTime"],
+      "sample": { "autoDeployEnabled": true, "autoRotateEnabled": true, "passwordRotationTime": 3600, "autoRotateExpirationTime": 7776000 }
+    },
+    {
+      "ref": "PR.PS-05",
+      "api": "GET /JSSResource/computergroups/id/{id}",
+      "fields": ["name", "is_smart", "criteria[].criterion.name", "criteria[].criterion.search_type", "criteria[].criterion.value"],
+      "sample": { "computer_group": { "name": "Unapproved Applications - Detected", "is_smart": true, "criteria": [ { "criterion": { "name": "Application Title", "search_type": "contains", "value": "Tor Browser" } } ] } }
+    },
+    {
+      "ref": "PR.AT-01",
+      "api": "GET /JSSResource/policies/id/{id}",
+      "fields": ["general.name", "general.enabled", "self_service.use_for_self_service", "self_service.self_service_description"],
+      "sample": { "policy": { "general": { "name": "Security Awareness Training 2026", "enabled": true }, "self_service": { "use_for_self_service": true, "self_service_description": "Complete your annual security-awareness training." } } }
+    },
+    {
+      "ref": "PR.AT-02",
+      "api": "GET /JSSResource/usergroups/id/{id}",
+      "fields": ["name", "is_smart", "criteria[].criterion.name", "criteria[].criterion.value"],
+      "sample": { "usergroup": { "name": "Engineering - privileged staff", "is_smart": true, "criteria": [ { "criterion": { "name": "Department", "search_type": "is", "value": "Engineering" } } ] } }
+    },
+    {
+      "ref": "PR.IR-02",
+      "api": "GET /v2/mobile-devices/{id}/detail",
+      "fields": ["name", "managed", "security.activationLockEnabled", "security.passcodeCompliant", "security.hardwareEncryption"],
+      "sample": { "name": "IPD-0031", "managed": true, "security": { "activationLockEnabled": true, "passcodeCompliant": true, "hardwareEncryption": 3 } }
+    },
+    {
+      "ref": "RC.RP-02",
+      "api": "POST /v2/mdm/commands",
+      "fields": ["commandData.commandType", "clientData[].managementId", "commandData.returnToService.enabled"],
+      "sample": { "clientData": [ { "managementId": "b3b2ba67-1632-4eaf-bd1c-885a34fa456a" } ], "commandData": { "commandType": "ERASE_DEVICE", "returnToService": { "enabled": true } } }
+    },
+    {
+      "ref": "RC.RP-05",
+      "api": "GET /v1/computers-inventory?filter=general.remoteManagement.managed==true",
+      "fields": ["general.name", "general.lastEnrolledDate", "general.lastContactTime", "general.remoteManagement.managed", "general.userApprovedMdm"],
+      "sample": { "general": { "name": "MBP-014", "lastEnrolledDate": "2026-10-02T09:14:00.000Z", "lastContactTime": "2026-10-07T15:17:55.860Z", "remoteManagement": { "managed": true }, "userApprovedMdm": true } }
+    },
+    {
+      "ref": "DE.CM-03",
+      "api": "GET /v1/computers-inventory",
+      "fields": ["general.name", "general.lastContactTime", "general.reportDate", "general.lastIpAddress", "general.lastReportedIp"],
+      "sample": { "general": { "name": "MBP-014", "lastContactTime": "2026-10-07T15:17:55.86Z", "reportDate": "2026-10-07T15:18:15.178Z", "lastIpAddress": "10.10.4.22", "lastReportedIp": "192.168.86.211" } }
+    }
+  ]
+}

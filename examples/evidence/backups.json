@@ -1,0 +1,6 @@
+[
+  { "resource": "rds-prod-orders", "type": "aws:rds:db", "policy": "daily", "last_snapshot_days": 2 },
+  { "resource": "ebs-vol-app-01", "type": "aws:ebs:volume", "policy": "daily", "last_snapshot_days": 21 },
+  { "resource": "ebs-vol-app-02", "type": "aws:ebs:volume", "policy": "daily", "last_snapshot_days": 3 },
+  { "resource": "dynamodb-sessions", "type": "aws:dynamodb:table", "policy": "point-in-time", "last_snapshot_days": 0 }
+]

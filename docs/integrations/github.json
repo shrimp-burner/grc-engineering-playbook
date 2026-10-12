@@ -1,0 +1,199 @@
+{
+  "tool": "GitHub",
+  "auth": "GitHub App installation token: sign a short-lived JWT with the App's RSA private key (iss = App ID, iat/exp <= 10 min), exchange it at POST /app/installations/{installation_id}/access_tokens for a ~1 hour installation access token scoped to the org's repositories. Request read-only org + repository permissions (administration, code scanning alerts, secret scanning alerts, dependabot alerts, contents, actions, audit_log, environments, members). A fine-grained PAT is a fallback for orgs that cannot install an App.",
+  "base_url": "https://api.github.com",
+  "endpoints": [
+    { "method": "GET", "path": "/orgs/{org}/repos", "purpose": "Inventory the software, services, and systems the org manages (ID.AM-02)." },
+    { "method": "GET", "path": "/orgs/{org}/code-scanning/alerts", "purpose": "List CodeQL/code scanning alerts across the org, including fixed (remediated) alerts identified by security testing (ID.IM-02, DE.CM-09)." },
+    { "method": "GET", "path": "/orgs/{org}/dependabot/alerts", "purpose": "Aggregate open/validated third-party dependency vulnerabilities across the org (ID.RA-01)." },
+    { "method": "GET", "path": "/repos/{owner}/{repo}/dependabot/alerts", "purpose": "Per-repository dependency advisories and their remediation state to show software is maintained/replaced commensurate with risk (PR.PS-02)." },
+    { "method": "GET", "path": "/repos/{owner}/{repo}/attestations/{subject_digest}", "purpose": "Fetch build-provenance/SBOM artifact attestations for an artifact digest to verify authenticity and integrity before use (ID.RA-09)." },
+    { "method": "GET", "path": "/orgs/{org}/rulesets", "purpose": "Read org-level rulesets that enforce supply-chain requirements (e.g. required dependency review and code scanning) on branches (GV.SC-05)." },
+    { "method": "GET", "path": "/repos/{owner}/{repo}/dependency-graph/sbom", "purpose": "Retrieve the SPDX SBOM for a repository to monitor third-party components across the software life cycle (GV.SC-09)." },
+    { "method": "GET", "path": "/orgs/{org}/actions/oidc/customization/sub", "purpose": "Read Actions OIDC subject-claim customization, evidencing short-lived workload federation instead of static cloud credentials (PR.AA-03)." },
+    { "method": "GET", "path": "/repos/{owner}/{repo}/environments", "purpose": "List deployment environments, reviewers, and deployment branch policy enforcing separation of duties for production (PR.AA-05)." },
+    { "method": "GET", "path": "/enterprises/{enterprise}/audit-log/streams", "purpose": "List configured audit-log streaming destinations, confirming log records are generated and forwarded for continuous monitoring (PR.PS-04)." },
+    { "method": "GET", "path": "/orgs/{org}/actions/permissions/selected-actions", "purpose": "Read the org's allowed-actions policy restricting which third-party Actions may execute (PR.PS-05)." },
+    { "method": "GET", "path": "/repos/{owner}/{repo}/branches/{branch}/protection", "purpose": "Read branch protection rules (reviews, status checks, admin enforcement) that gate the secure SDLC (PR.PS-06)." },
+    { "method": "GET", "path": "/orgs/{org}/secret-scanning/alerts", "purpose": "List secret-scanning alerts, including push-protection bypasses and credential validity, as data/runtime monitoring (DE.CM-09)." },
+    { "method": "GET", "path": "/orgs/{org}/audit-log", "purpose": "Query the organization audit log recording investigator and administrative actions with actors and timestamps (events retained 180 days per GitHub docs) (RS.AN-06)." }
+  ],
+  "controls": [
+    {
+      "ref": "ID.AM-02",
+      "api": "GET /orgs/{org}/repos",
+      "fields": ["name", "language", "visibility", "archived", "updated_at", "topics"],
+      "sample": {
+        "name": "acme-payments",
+        "language": "Go",
+        "visibility": "private",
+        "archived": false,
+        "updated_at": "2026-09-30T12:00:00Z",
+        "topics": ["service", "pci"]
+      }
+    },
+    {
+      "ref": "ID.RA-01",
+      "api": "GET /orgs/{org}/dependabot/alerts",
+      "fields": ["number", "state", "dependency.package.ecosystem", "security_advisory.severity", "dependency.manifest_path"],
+      "sample": {
+        "number": 128,
+        "state": "open",
+        "dependency": { "package": { "ecosystem": "npm" }, "manifest_path": "package-lock.json" },
+        "security_advisory": { "ghsa_id": "GHSA-35jh-r3h4-6jhm", "severity": "high" }
+      }
+    },
+    {
+      "ref": "ID.RA-09",
+      "api": "GET /repos/{owner}/{repo}/attestations/{subject_digest}",
+      "fields": ["attestations[].repository_id", "attestations[].bundle.mediaType", "attestations[].bundle.dsseEnvelope.payloadType"],
+      "sample": {
+        "attestations": [
+          {
+            "repository_id": 123456789,
+            "bundle": {
+              "mediaType": "application/vnd.dev.sigstore.bundle+json;version=0.3",
+              "dsseEnvelope": { "payloadType": "application/vnd.in-toto+json" }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ref": "ID.IM-02",
+      "api": "GET /orgs/{org}/code-scanning/alerts",
+      "fields": ["number", "state", "rule.id", "rule.security_severity_level", "tool.name", "most_recent_instance.commit_sha"],
+      "sample": {
+        "number": 42,
+        "state": "fixed",
+        "rule": { "id": "js/sql-injection", "security_severity_level": "high" },
+        "tool": { "name": "CodeQL", "version": "2.18.0" },
+        "most_recent_instance": { "commit_sha": "9f2c1d3e5a7b9c0d1e2f3a4b5c6d7e8f90a1b2c3" }
+      }
+    },
+    {
+      "ref": "GV.SC-05",
+      "api": "GET /orgs/{org}/rulesets",
+      "fields": ["name", "target", "enforcement", "rules", "conditions"],
+      "sample": {
+        "name": "supply-chain-gate",
+        "target": "branch",
+        "enforcement": "active",
+        "rules": [
+          {
+            "type": "required_status_checks",
+            "parameters": { "strict_required_status_checks_policy": true, "required_status_checks": [{ "context": "dependency-review" }] }
+          }
+        ]
+      }
+    },
+    {
+      "ref": "GV.SC-09",
+      "api": "GET /repos/{owner}/{repo}/dependency-graph/sbom",
+      "fields": ["sbom.spdxVersion", "sbom.name", "sbom.creationInfo.created", "sbom.packages"],
+      "sample": {
+        "sbom": {
+          "spdxVersion": "SPDX-2.3",
+          "name": "acme-payments",
+          "creationInfo": { "created": "2026-09-30T12:05:00Z" },
+          "packages": [{ "name": "golang.org/x/crypto", "versionInfo": "v0.31.0", "licenseDeclared": "BSD-3-Clause" }]
+        }
+      }
+    },
+    {
+      "ref": "PR.AA-03",
+      "api": "GET /orgs/{org}/actions/oidc/customization/sub",
+      "fields": ["use_default", "include_claim_keys"],
+      "sample": {
+        "use_default": false,
+        "include_claim_keys": ["repo", "context", "job_workflow_ref"]
+      }
+    },
+    {
+      "ref": "PR.AA-05",
+      "api": "GET /repos/{owner}/{repo}/environments",
+      "fields": ["environments[].name", "environments[].protection_rules", "environments[].deployment_branch_policy"],
+      "sample": {
+        "environments": [
+          {
+            "name": "production",
+            "protection_rules": [
+              { "type": "required_reviewers", "reviewers": [{ "type": "Team", "id": 42 }] }
+            ],
+            "deployment_branch_policy": { "protected_branches": true, "custom_branch_policies": false }
+          }
+        ]
+      }
+    },
+    {
+      "ref": "PR.PS-02",
+      "api": "GET /repos/{owner}/{repo}/dependabot/alerts",
+      "fields": ["number", "state", "dependency.package.name", "security_advisory.severity", "auto_dismissed_at"],
+      "sample": {
+        "number": 91,
+        "state": "fixed",
+        "dependency": { "package": { "name": "lodash" } },
+        "security_advisory": { "ghsa_id": "GHSA-35jh-r3h4-6jhm", "severity": "high" },
+        "auto_dismissed_at": null
+      }
+    },
+    {
+      "ref": "PR.PS-04",
+      "api": "GET /enterprises/{enterprise}/audit-log/streams",
+      "fields": ["id", "enabled", "stream_type", "stream_details", "paused_at"],
+      "sample": {
+        "id": 1,
+        "enabled": true,
+        "stream_type": "Amazon S3",
+        "stream_details": "acme-audit-logs",
+        "paused_at": null
+      }
+    },
+    {
+      "ref": "PR.PS-05",
+      "api": "GET /orgs/{org}/actions/permissions/selected-actions",
+      "fields": ["github_owned_allowed", "verified_allowed", "patterns_allowed"],
+      "sample": {
+        "github_owned_allowed": true,
+        "verified_allowed": true,
+        "patterns_allowed": ["actions/*", "github/*", "acme-org/*"]
+      }
+    },
+    {
+      "ref": "PR.PS-06",
+      "api": "GET /repos/{owner}/{repo}/branches/{branch}/protection",
+      "fields": ["required_pull_request_reviews", "required_status_checks", "enforce_admins", "allow_force_pushes", "required_linear_history"],
+      "sample": {
+        "required_pull_request_reviews": { "required_approving_review_count": 2, "dismiss_stale_reviews": true },
+        "required_status_checks": { "strict": true, "contexts": ["CodeQL", "dependency-review"] },
+        "enforce_admins": { "enabled": true },
+        "allow_force_pushes": { "enabled": false }
+      }
+    },
+    {
+      "ref": "DE.CM-09",
+      "api": "GET /orgs/{org}/secret-scanning/alerts",
+      "fields": ["number", "state", "secret_type", "validity", "push_protection_bypassed"],
+      "sample": {
+        "number": 7,
+        "state": "resolved",
+        "secret_type": "github_personal_access_token",
+        "validity": "inactive",
+        "push_protection_bypassed": false
+      }
+    },
+    {
+      "ref": "RS.AN-06",
+      "api": "GET /orgs/{org}/audit-log",
+      "fields": ["action", "actor", "created_at", "hashed_token", "repo", "operation_type"],
+      "sample": {
+        "action": "org.update_member_repository_permission",
+        "actor": "security-bot",
+        "created_at": 1759846800000,
+        "hashed_token": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+        "repo": "acme/acme-payments",
+        "operation_type": "modify"
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "_note": "BAD IAM policy: full admin. Should never exist for an application role.",
+  "Version": "2012-10-17",
+  "Statement": [
+    { "Sid": "OopsAllAdmin", "Effect": "Allow", "Action": "*", "Resource": "*" }
+  ]
+}

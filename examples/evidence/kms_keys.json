@@ -1,0 +1,4 @@
+[
+  { "id": "key/evidence", "description": "evidence encryption", "rotation_enabled": true },
+  { "id": "key/legacy", "description": "legacy app key", "rotation_enabled": false }
+]

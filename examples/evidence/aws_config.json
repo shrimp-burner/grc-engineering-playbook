@@ -1,0 +1,6 @@
+{
+  "_service": "AWS Config",
+  "recorder_enabled": true,
+  "delivery_channel": true,
+  "aggregator": true
+}

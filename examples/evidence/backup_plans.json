@@ -1,0 +1,4 @@
+[
+  { "name": "daily-backup", "resources_covered": 10, "last_run_days": 1 },
+  { "name": "weekly-archive", "resources_covered": 4, "last_run_days": 12 }
+]
